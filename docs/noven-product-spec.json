@@ -1,0 +1,422 @@
+{
+  "meta": {
+    "product_name": "Noven",
+    "platform": "iOS",
+    "theme": "minimal_monochrome_psychological_os",
+    "design_language": "calm_premium_editorial"
+  },
+  "foundation": {
+    "canvas": {
+      "width": 393,
+      "height": 852,
+      "safe_area_top": 59,
+      "safe_area_bottom": 34
+    },
+    "colors": {
+      "background": "#FFFFFF",
+      "foreground": "#0D0D0F",
+      "muted_text": "#6F6F73",
+      "soft_text": "#9A9AA1",
+      "border": "#ECECEF",
+      "surface": "#F7F7F8",
+      "surface_dark": "#0D0D0F",
+      "success": "#1F9D55",
+      "warning": "#E7A500",
+      "danger": "#D92D20"
+    },
+    "spacing": {
+      "screen_horizontal": 28,
+      "section_gap": 36,
+      "component_gap": 18,
+      "small_gap": 10
+    },
+    "radius": {
+      "button": 18,
+      "input": 16,
+      "card": 28,
+      "pill": 999
+    },
+    "typography": {
+      "display": {
+        "font": "Playfair Display",
+        "size": 40,
+        "line_height": 50,
+        "weight": 400
+      },
+      "heading": {
+        "font": "Playfair Display",
+        "size": 30,
+        "line_height": 40,
+        "weight": 400
+      },
+      "body": {
+        "font": "Inter",
+        "size": 16,
+        "line_height": 26,
+        "weight": 400
+      },
+      "small": {
+        "font": "Inter",
+        "size": 14,
+        "line_height": 22,
+        "weight": 400
+      },
+      "caption": {
+        "font": "Inter",
+        "size": 12,
+        "line_height": 16,
+        "weight": 600,
+        "letter_spacing": 2
+      }
+    }
+  },
+  "illustration_system": {
+    "style": {
+      "type": "2d_monochrome_vector",
+      "rules": [
+        "transparent_png",
+        "no_ui",
+        "no_text",
+        "no_phone_frame",
+        "soft_grayscale",
+        "editorial_anime_inspired",
+        "subtle_glow",
+        "mist_and_planet_language",
+        "minimal_linework",
+        "low_visual_noise"
+      ]
+    },
+    "assets": [
+      {
+        "id": "welcome_reflection_wide",
+        "description": "Wide reflective onboarding scene"
+      },
+      {
+        "id": "name_writing_clean",
+        "description": "Clean writing scene for name entry"
+      },
+      {
+        "id": "standing_future_character",
+        "description": "Standing facing horizon"
+      }
+    ]
+  },
+  "navigation": {
+    "bottom_tabs": [
+      "Home",
+      "Habits",
+      "Patterns",
+      "Profile"
+    ]
+  },
+  "screens": {
+    "welcome": {
+      "title": "Understand your mind.\nDesign your life.",
+      "subtitle": "A personality-driven system for habits that truly fit you.",
+      "asset": "welcome_reflection_wide",
+      "button": "Get Started"
+    },
+    "name_input": {
+      "title": "Let's start with your name.",
+      "subtitle": "What should we call you?",
+      "asset": "name_writing_clean",
+      "input": {
+        "placeholder": "Your name"
+      },
+      "button": "Continue"
+    },
+    "mbti_selection": {
+      "title": "What's your MBTI type?",
+      "subtitle": "This helps personalize your system.",
+      "asset": "welcome_reflection_wide",
+      "selection": [
+        "INTJ",
+        "INTP",
+        "ENTJ",
+        "ENTP",
+        "INFJ",
+        "INFP",
+        "ENFJ",
+        "ENFP",
+        "ISTJ",
+        "ISFJ",
+        "ESTJ",
+        "ESFJ",
+        "ISTP",
+        "ISFP",
+        "ESTP",
+        "ESFP"
+      ],
+      "secondary_action": "I don't know my type yet",
+      "button": "Continue"
+    },
+    "focus_selection": {
+      "title": "What should you focus on most?",
+      "subtitle": "Choose what matters most right now.",
+      "asset": "standing_future_character",
+      "options": [
+        "Better focus",
+        "Consistency",
+        "Mental clarity",
+        "Routine building",
+        "Energy balance",
+        "Deep work"
+      ],
+      "button": "Continue"
+    },
+    "about_noven": {
+      "title": "Here's what Noven is.",
+      "subtitle": "A system built around psychology, behavior, and personality.",
+      "features": [
+        {
+          "title": "Personalized",
+          "description": "Built around how your mind works."
+        },
+        {
+          "title": "Adaptive",
+          "description": "Changes as your habits evolve."
+        },
+        {
+          "title": "Minimal",
+          "description": "Clarity over complexity."
+        }
+      ],
+      "asset": "welcome_reflection_wide",
+      "button": "Continue"
+    },
+    "future_system": {
+      "title": "Your system.\nYour life.",
+      "subtitle": "Let's build a system that truly fits you.",
+      "asset": "standing_future_character",
+      "button": "Let's Begin"
+    },
+    "authentication": {
+      "title": "Your system is ready.",
+      "subtitle": "Everything is stored locally on this device.",
+      "asset": "standing_future_character",
+      "buttons": [
+        "Enter Noven"
+      ]
+    },
+    "home": {
+      "header": {
+        "greeting": "Good evening, Alex.",
+        "mbti": "INFJ-T",
+        "insight": "Your focus is clear today. Protect it from distraction."
+      },
+      "background_asset": "standing_future_character",
+      "focus_card": {
+        "title": "TODAY'S FOCUS",
+        "description": "Finish what matters before starting something new.",
+        "progress": 0.78
+      },
+      "adaptive_habits": [
+        {
+          "title": "Deep Work",
+          "subtitle": "2 / 3 sessions",
+          "progress": 0.66
+        },
+        {
+          "title": "Reflection",
+          "subtitle": "Evening routine",
+          "progress": 0.5
+        },
+        {
+          "title": "Morning Reset",
+          "subtitle": "Daily routine",
+          "progress": 0.25
+        }
+      ]
+    },
+    "habit_discovery": {
+      "title": "Recommended for you",
+      "subtitle": "Based on your personality and focus patterns.",
+      "categories": [
+        "Focus",
+        "Mind",
+        "Energy",
+        "Routine"
+      ],
+      "habits": [
+        {
+          "title": "Deep Work",
+          "description": "Protect uninterrupted focus sessions."
+        },
+        {
+          "title": "Journaling",
+          "description": "Reflect and organize your thoughts."
+        },
+        {
+          "title": "Morning Reset",
+          "description": "Start your day with clarity."
+        }
+      ]
+    },
+    "create_habit": {
+      "title": "Create New Habit",
+      "fields": [
+        "Habit Name",
+        "Category",
+        "Frequency",
+        "Time",
+        "Reminder"
+      ],
+      "save_button": "Save Habit"
+    },
+    "setup_complete": {
+      "title": "You're all set!",
+      "subtitle": "Your habit has been added to your system.",
+      "asset": "standing_future_character",
+      "buttons": [
+        "Start Today",
+        "Add Another Habit"
+      ]
+    },
+    "habit_detail": {
+      "title": "Meditation",
+      "stats": {
+        "streak_days": 7,
+        "completion_rate": 78
+      },
+      "sections": [
+        "About this habit",
+        "Reminders",
+        "Weekly progress"
+      ],
+      "primary_button": "Complete Today"
+    },
+    "daily_reflection": {
+      "title": "How did it go today?",
+      "reflection_options": [
+        "Felt focused",
+        "Had enough time",
+        "Felt stressed",
+        "Was distracted",
+        "Forgot",
+        "Not in the mood"
+      ],
+      "notes_placeholder": "Write an optional reflection...",
+      "button": "Save Reflection"
+    },
+    "patterns": {
+      "title": "Patterns",
+      "sections": [
+        {
+          "title": "Consistency",
+          "type": "bar_chart"
+        },
+        {
+          "title": "Focus Trend",
+          "type": "line_chart"
+        },
+        {
+          "title": "Best Day",
+          "value": "Sunday"
+        },
+        {
+          "title": "Current Streak",
+          "value": "7 days"
+        }
+      ]
+    },
+    "adjust_habit": {
+      "title": "Adjust Habit",
+      "suggestions": [
+        {
+          "title": "Reduce difficulty",
+          "description": "Make the habit easier to maintain."
+        },
+        {
+          "title": "Change time",
+          "description": "Move it to a better moment."
+        },
+        {
+          "title": "Pause temporarily",
+          "description": "Take a short break without losing progress."
+        }
+      ]
+    },
+    "milestone": {
+      "title": "Great job, Alex!",
+      "subtitle": "You've built momentum. Keep going.",
+      "stats": {
+        "streak_days": 7
+      },
+      "buttons": [
+        "View Progress",
+        "Continue"
+      ]
+    },
+    "profile": {
+      "header": {
+        "name": "Alex",
+        "mbti": "INFJ-T"
+      },
+      "sections": [
+        {
+          "title": "Personality",
+          "items": [
+            "Reflective",
+            "Independent",
+            "Deep thinker"
+          ]
+        },
+        {
+          "title": "Focus Goal",
+          "value": "Better Focus"
+        },
+        {
+          "title": "Work Style",
+          "value": "Deep work & solitude"
+        }
+      ]
+    },
+    "settings": {
+      "sections": [
+        "Account",
+        "Notifications",
+        "Habit Reminders",
+        "Appearance",
+        "Privacy",
+        "Data Backup",
+        "About Noven"
+      ],
+      "logout_button": {
+        "text": "Log Out",
+        "color": "#D92D20"
+      }
+    },
+    "empty_state": {
+      "title": "No habits yet",
+      "subtitle": "Add your first habit to start building your system.",
+      "asset": "standing_future_character",
+      "buttons": [
+        "Discover Habits",
+        "Create Your Own"
+      ]
+    },
+    "loading": {
+      "background": "#FFFFFF",
+      "indicator": "minimal_spinner",
+      "text": "Building your system..."
+    },
+    "errors": {
+      "network": {
+        "title": "Something paused",
+        "description": "Go back and try the previous step again."
+      },
+      "auth_failed": {
+        "title": "Something went wrong",
+        "description": "Return to the previous step and try again."
+      },
+      "empty_name": {
+        "title": "Enter your name",
+        "description": "Your system needs a name to begin."
+      },
+      "no_mbti": {
+        "title": "Choose your MBTI type",
+        "description": "Or select \"I don't know yet.\""
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "stack": {
+    "framework": "React Native + Expo",
+    "language": "TypeScript",
+    "state_management": "Zustand",
+    "backend": "SQLite local-first",
+    "ui": {
+      "core": [
+        "react-native-safe-area-context",
+        "react-native-screens",
+        "react-native-gesture-handler",
+        "react-native-reanimated",
+        "react-native-svg",
+        "expo-linear-gradient",
+        "expo-blur"
+      ],
+      "navigation": [
+        "@react-navigation/native",
+        "@react-navigation/native-stack",
+        "@react-navigation/bottom-tabs"
+      ],
+      "forms": [
+        "react-hook-form",
+        "zod",
+        "@hookform/resolvers"
+      ],
+      "animations": [
+        "moti",
+        "lottie-react-native"
+      ],
+      "icons": [
+        "lucide-react-native"
+      ],
+      "charts": [
+        "victory-native",
+        "react-native-svg"
+      ]
+    },
+    "local_database": [
+      "expo-sqlite"
+    ],
+    "expo": [
+      "expo-font",
+      "expo-secure-store",
+      "expo-notifications",
+      "expo-haptics",
+      "expo-image",
+      "expo-router"
+    ],
+    "date_time": [
+      "date-fns"
+    ]
+  },
+  "install_commands": {
+    "create_project": "npx create-expo-app noven --template",
+    "install_core": "npx expo install react-native-safe-area-context react-native-screens react-native-gesture-handler react-native-reanimated react-native-svg expo-linear-gradient expo-blur expo-font expo-secure-store expo-notifications expo-haptics expo-image",
+    "install_navigation": "npm install @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs",
+    "install_state_forms": "npm install zustand react-hook-form zod @hookform/resolvers",
+    "install_ui": "npm install lucide-react-native moti victory-native date-fns",
+    "install_sqlite": "npx expo install expo-sqlite"
+  },
+  "rules_for_llm_builder": [
+    "Do not build a custom UI library from scratch.",
+    "Use reusable React Native components.",
+    "Use Zustand for global app state.",
+    "Use Expo SQLite for users, habits, reflections, and pattern data.",
+    "Do not add fake AI, Apple sign-in, Google sign-in, Firebase, or provider-dependent flows.",
+    "Use react-hook-form and zod for onboarding and habit forms.",
+    "Use lucide-react-native for icons.",
+    "Use react-native-svg for vector assets and charts.",
+    "Keep all UI driven by the design system JSON.",
+    "Do not hardcode spacing, colors, typography, or radius inside screens."
+  ]
+}
