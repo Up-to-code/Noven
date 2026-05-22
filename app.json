@@ -16,7 +16,6 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ahmedss7.noven",
-      "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -49,6 +48,13 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "498bc6ee-754f-4cf5-ace1-8b6bd7f91897"
+      }
+    },
+    "owner": "ahmedss7"
   }
 }
