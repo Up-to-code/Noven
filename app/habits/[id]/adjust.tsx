@@ -17,19 +17,17 @@ import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
+import { formatTime, useAppLocale } from "@/localization";
 import { useHabitStore } from "@/store/habitStore";
 import type { Habit, HabitCategory } from "@/types";
 
-const habitSchema = z.object({
-  title: z.string().trim().min(1, "Habit name is required"),
-});
-
-type HabitForm = z.infer<typeof habitSchema>;
+type HabitForm = { title: string };
 
 const categories: HabitCategory[] = ["Focus", "Mind", "Energy", "Routine"];
-const steps = ["Name", "Type", "Time", "Repeat"];
+const steps = ["habits.steps.name", "habits.steps.type", "habits.steps.time", "habits.steps.repeat"];
 
 export default function AdjustHabitScreen() {
+  const { t } = useAppLocale();
   const { id } = useLocalSearchParams<{ id: string }>();
   const habit = useHabitStore((state) => state.getHabit(id));
   const updateHabit = useHabitStore((state) => state.updateHabit);
@@ -42,6 +40,9 @@ export default function AdjustHabitScreen() {
   const [step, setStep] = useState(0);
   const fade = useRef(new Animated.Value(1)).current;
   const slide = useRef(new Animated.Value(0)).current;
+  const habitSchema = z.object({
+    title: z.string().trim().min(1, t("habits.nameRequired")),
+  });
   const {
     control,
     handleSubmit,
@@ -89,9 +90,9 @@ export default function AdjustHabitScreen() {
     return (
       <Screen>
         <ScreenHeader showBack />
-        <Text variant="heading">Habit not found</Text>
+        <Text variant="heading">{t("habits.notFoundTitle")}</Text>
         <Text color="muted" variant="body">
-          This habit may have been removed from your local system.
+          {t("habits.notFoundBody")}
         </Text>
       </Screen>
     );
@@ -104,13 +105,13 @@ export default function AdjustHabitScreen() {
 
     isSavingRef.current = true;
     setIsSaving(true);
-    const reminderTime = reminderDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const reminderTime = formatTime(reminderDate);
     updateHabit({
       ...habit,
       title: values.title,
-      description: `${timesPerDay} time${timesPerDay > 1 ? "s" : ""} daily, spaced by ${gapHours}h.`,
+      description: t("habits.frequency", { count: timesPerDay, hours: gapHours }),
       category,
-      frequency: `${timesPerDay}x daily`,
+      frequency: t("habits.dailyFrequency", { count: timesPerDay }),
       reminderTime,
     });
     router.replace(`/habits/${habit.id}`);
@@ -130,7 +131,7 @@ export default function AdjustHabitScreen() {
   return (
     <Screen topPadding={spacing.smallGap} contentStyle={{ justifyContent: "space-between", gap: spacing.componentGap }}>
       <Screen.Section style={{ gap: spacing.sectionGap }}>
-        <ScreenHeader title="Edit" showBack />
+        <ScreenHeader title={t("habits.editTitle")} showBack />
         <StepBar step={step} />
         <Animated.View
           style={{
@@ -139,7 +140,7 @@ export default function AdjustHabitScreen() {
           }}
         >
           {step === 0 ? (
-            <JourneyCard eyebrow="STEP 1" title="Name the habit" subtitle="Update the name you want to see on this goal.">
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 1 })} title={t("habits.nameTitle")} subtitle={t("habits.nameEditSubtitle")}>
               <Controller
                 control={control}
                 name="title"
@@ -148,7 +149,7 @@ export default function AdjustHabitScreen() {
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
-                    placeholder="Habit name"
+                    placeholder={t("habits.namePlaceholder")}
                     error={errors.title?.message}
                     style={{ marginTop: spacing.componentGap }}
                   />
@@ -157,16 +158,16 @@ export default function AdjustHabitScreen() {
             </JourneyCard>
           ) : null}
           {step === 1 ? (
-            <JourneyCard eyebrow="STEP 2" title="Choose its shape" subtitle={title ? `${title} belongs closest to...` : "Pick the closest habit family."}>
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 2 })} title={t("habits.shapeTitle")} subtitle={title ? t("habits.shapeNamedSubtitle", { title }) : t("habits.shapeSubtitle")}>
               <Chip.Group style={{ marginTop: spacing.componentGap }}>
                 {categories.map((item) => (
-                  <Chip key={item} label={item} selected={category === item} onPress={() => setCategory(item)} />
+                  <Chip key={item} label={t(`categories.${item}`)} selected={category === item} onPress={() => setCategory(item)} />
                 ))}
               </Chip.Group>
             </JourneyCard>
           ) : null}
           {step === 2 ? (
-            <JourneyCard eyebrow="STEP 3" title="Set the reminder" subtitle="Move the nudge to the moment it fits best.">
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 3 })} title={t("habits.reminderTitle")} subtitle={t("habits.reminderEditSubtitle")}>
               <DateTimePicker
                 value={reminderDate}
                 mode="time"
@@ -180,9 +181,9 @@ export default function AdjustHabitScreen() {
             </JourneyCard>
           ) : null}
           {step === 3 ? (
-            <JourneyCard eyebrow="STEP 4" title="Tune the rhythm" subtitle="Change the repetition count and spacing.">
-              <CounterRow label="Times per day" value={timesPerDay} min={1} max={6} onChange={setTimesPerDay} />
-              <CounterRow label="Gap between" suffix="h" value={gapHours} min={1} max={12} onChange={setGapHours} />
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 4 })} title={t("habits.rhythmTitle")} subtitle={t("habits.rhythmEditSubtitle")}>
+              <CounterRow label={t("habits.timesPerDay")} value={timesPerDay} min={1} max={6} onChange={setTimesPerDay} />
+              <CounterRow label={t("habits.gapBetween")} suffix="h" value={gapHours} min={1} max={12} onChange={setGapHours} />
             </JourneyCard>
           ) : null}
         </Animated.View>
@@ -191,7 +192,7 @@ export default function AdjustHabitScreen() {
       <View style={{ flexDirection: "row", gap: spacing.smallGap }}>
         {step > 0 ? (
           <Button
-            label="Back"
+            label={t("common.back")}
             feedback="next"
             onPress={() => setStep((current) => Math.max(0, current - 1))}
             variant="secondary"
@@ -199,7 +200,7 @@ export default function AdjustHabitScreen() {
           />
         ) : null}
         <Button
-          label={step === steps.length - 1 ? "Save Changes" : "Continue"}
+          label={step === steps.length - 1 ? t("habits.saveChanges") : t("common.continue")}
           feedback={step === steps.length - 1 ? "success" : "next"}
           loading={isSaving}
           disabled={isSaving}
@@ -212,6 +213,8 @@ export default function AdjustHabitScreen() {
 }
 
 function StepBar({ step }: { step: number }) {
+  const { t } = useAppLocale();
+
   return (
     <View style={{ gap: spacing.smallGap }}>
       <View style={{ flexDirection: "row", gap: spacing.smallGap }}>
@@ -233,7 +236,7 @@ function StepBar({ step }: { step: number }) {
               }}
               numberOfLines={1}
             >
-              {item}
+              {t(item)}
             </Text>
           </View>
         ))}

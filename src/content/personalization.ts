@@ -22,22 +22,25 @@ export function typeFamily(type?: string) {
 }
 
 export function focusPrompt(name?: string) {
-  return `${namePrefix(name)}what should your system support first?`;
+  return translate("onboarding.focusTitle", { prefix: namePrefix(name) });
 }
 
 export function aboutSubtitle(type?: string, focus?: string) {
   const family = typeFamily(type);
-  const focusText = focus ? ` around ${focus.toLowerCase()}` : "";
-  return `A calm ${family} system shaped${focusText}.`;
+  const focusText = focus ? translate("onboarding.aboutFocus", { focus: localizeStoredFocus(focus).toLowerCase() }) : "";
+  return translate("onboarding.aboutSubtitle", { family: translate(`families.${family}`), focus: focusText });
 }
 
 export function futureTitle(name?: string) {
   const resolvedName = firstName(name);
-  return resolvedName ? `${resolvedName}, your system.` : "Your system.";
+  return resolvedName
+    ? translate("onboarding.futureNamedTitle", { name: resolvedName })
+    : translate("onboarding.futureFallbackTitle");
 }
 
 export function homeInsight(type?: string, focus?: string) {
   const family = typeFamily(type);
-  if (focus) return `${family} rhythm · ${focus}`;
-  return `${family} rhythm · Protect what matters.`;
+  if (focus) return translate("home.homeInsight", { family: translate(`families.${family}`), focus: localizeStoredFocus(focus) });
+  return translate("home.homeInsightFallback", { family: translate(`families.${family}`) });
 }
+import { localizeStoredFocus, translate } from "@/localization";

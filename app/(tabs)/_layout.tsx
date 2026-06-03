@@ -4,6 +4,7 @@ import { BarChart3, Home, Sprout, User, type LucideIcon } from "lucide-react-nat
 import { colors } from "@/design/colors";
 import { spacing } from "@/design/spacing";
 import { typography } from "@/design/typography";
+import { useAppLocale } from "@/localization";
 
 function tabIcon(Icon: LucideIcon) {
   return ({ color, size }: { color: string; size: number }) => (
@@ -12,6 +13,8 @@ function tabIcon(Icon: LucideIcon) {
 }
 
 export default function TabsLayout() {
+  const { t } = useAppLocale();
+
   return (
     <Tabs
       screenOptions={{
@@ -30,10 +33,10 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: tabIcon(Home) }} />
-      <Tabs.Screen name="habits" options={{ title: "Habits", tabBarIcon: tabIcon(Sprout) }} />
-      <Tabs.Screen name="patterns" options={{ title: "Patterns", tabBarIcon: tabIcon(BarChart3) }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: tabIcon(User) }} />
+      <Tabs.Screen name="index" options={{ title: t("tabs.home"), tabBarIcon: tabIcon(Home) }} />
+      <Tabs.Screen name="habits" options={{ title: t("tabs.habits"), tabBarIcon: tabIcon(Sprout) }} />
+      <Tabs.Screen name="patterns" options={{ title: t("tabs.patterns"), tabBarIcon: tabIcon(BarChart3) }} />
+      <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: tabIcon(User) }} />
     </Tabs>
   );
 }

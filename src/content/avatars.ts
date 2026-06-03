@@ -1,11 +1,11 @@
 export const defaultAvatarId = "strategist";
 
 export const avatarOptions = [
-  { id: "strategist", label: "Strategist", source: require("@/assets/Avatars/IMG_7498 1.png") },
-  { id: "observer", label: "Observer", source: require("@/assets/Avatars/IMG_7843 1.png") },
-  { id: "builder", label: "Builder", source: require("@/assets/Avatars/IMG_7845 1.png") },
-  { id: "dreamer", label: "Dreamer", source: require("@/assets/Avatars/IMG_7846 1.png") },
-  { id: "custom", label: "Custom", source: require("@/assets/Avatars/IMG_7847 1.png") },
+  { id: "strategist", label: "Strategist", source: require("../assets/Avatars/strategist.png") },
+  { id: "observer", label: "Observer", source: require("../assets/Avatars/observer.png") },
+  { id: "builder", label: "Builder", source: require("../assets/Avatars/builder.png") },
+  { id: "dreamer", label: "Dreamer", source: require("../assets/Avatars/dreamer.png") },
+  { id: "custom", label: "Custom", source: require("../assets/Avatars/custom.png") },
 ] as const;
 
 export type AvatarId = (typeof avatarOptions)[number]["id"];

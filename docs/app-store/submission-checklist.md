@@ -23,9 +23,16 @@
 - Add privacy policy URL.
 - Replace every `your-domain.example`, `support@example.com`, and placeholder review contact value before submission.
 - Confirm the public privacy policy URL matches the in-app privacy screen.
+- Add the Terms of Use (EULA) link to the app description or App Store Connect EULA field:
+  `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`
 - Create App Store Connect auto-renewable subscriptions:
   - `com.ahmedss7.noven.premium.monthly`
   - `com.ahmedss7.noven.premium.annual`
+- For each subscription, add required metadata, pricing, localization, and an App Review screenshot:
+  - Display name: `Noven Premium Monthly` / `Noven Premium Annual`
+  - Description: mention unlimited habits beyond the free two-habit limit, Markdown prompt export, and advanced monthly pattern details
+  - Duration: 1 month / 1 year
+- Submit the Monthly and Annual subscriptions for review with the new app version.
 - Configure Adapty with access level `premium` and placements `onboarding` and `settings`.
 - Add screenshots for required iPhone sizes.
 - Add app description, subtitle, keywords, and promotional text from `app-store-connect-record.md`.

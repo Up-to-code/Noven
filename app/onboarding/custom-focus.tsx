@@ -14,17 +14,18 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { namePrefix } from "@/content/personalization";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
-const customFocusSchema = z.object({
-  focus: z.string().trim().min(2, "Add a focus to continue"),
-});
-
-type CustomFocusForm = z.infer<typeof customFocusSchema>;
+type CustomFocusForm = { focus: string };
 
 export default function CustomFocusScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const setFocus = useOnboardingStore((state) => state.setFocus);
+  const customFocusSchema = z.object({
+    focus: z.string().trim().min(2, t("onboarding.customFocusRequired")),
+  });
   const {
     control,
     handleSubmit,
@@ -58,10 +59,10 @@ export default function CustomFocusScreen() {
 
       <View style={{ gap: spacing.smallGap }}>
         <Text variant="heading" style={{ maxWidth: 320 }}>
-          {namePrefix(name)}name your focus.
+          {t("onboarding.customFocusTitle", { prefix: namePrefix(name) })}
         </Text>
         <Text variant="body" color="muted" style={{ maxWidth: 300 }}>
-          Add the thing you want your system to support.
+          {t("onboarding.customFocusSubtitle")}
         </Text>
       </View>
 
@@ -74,7 +75,7 @@ export default function CustomFocusScreen() {
               value={value}
               onBlur={onBlur}
               onChangeText={onChange}
-              placeholder="Your focus"
+              placeholder={t("onboarding.customFocusPlaceholder")}
               autoCapitalize="sentences"
               autoCorrect={false}
               error={errors.focus?.message}
@@ -84,7 +85,7 @@ export default function CustomFocusScreen() {
       </KeyboardAvoidingView>
 
       <ActionPanel style={{ marginTop: "auto" }}>
-        <Button label="Continue" onPress={onSubmit} />
+        <Button label={t("common.continue")} onPress={onSubmit} />
       </ActionPanel>
     </Screen>
   );

@@ -1,51 +1,61 @@
-import { View } from "react-native";
+import { Linking, Pressable, View } from "react-native";
 
 import { Screen } from "@/components/ui/Screen";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { ScreenIntro } from "@/components/ui/ScreenIntro";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { colors } from "@/design/colors";
+import { useAppLocale } from "@/localization";
 
 const sections = [
-  {
-    title: "Use",
-    body: "Noven helps you organize habits, reflections, reminders, and personal focus patterns. It is not medical, clinical, or mental health advice.",
-  },
-  {
-    title: "Your responsibility",
-    body: "You choose what to enter, what reminders to enable, and where exported prompt text is shared.",
-  },
-  {
-    title: "Local data",
-    body: "Data is stored on your device. Reset Local Data removes the app profile, habits, logs, and reflections from Noven's local storage.",
-  },
-  {
-    title: "Premium",
-    body: "Noven Premium is an optional auto-renewable subscription billed by Apple. Manage or cancel it from your Apple ID subscription settings.",
-  },
-  {
-    title: "No account",
-    body: "This build has no sign-in, cloud backup, ads, or social features. Core habit creation remains available without Premium.",
-  },
+  ["legal.sections.personalUse", "legal.sections.personalUseBody"],
+  ["legal.sections.purchases", "legal.sections.purchasesBody"],
+  ["legal.sections.exports", "legal.sections.exportsBody"],
+  ["legal.sections.responsibility", "legal.sections.responsibilityBody"],
+  ["legal.sections.localData", "legal.sections.localDataBody"],
+  ["legal.sections.appleEula", "legal.sections.appleEulaBody"],
+  ["legal.sections.changes", "legal.sections.changesBody"],
 ];
 
+const appleEulaUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+
 export default function TermsScreen() {
+  const { t } = useAppLocale();
+
   return (
     <Screen contentStyle={{ gap: spacing.sectionGap }}>
-      <ScreenHeader title="Terms" showBack />
+      <ScreenHeader title={t("legal.termsTitle")} showBack />
       <ScreenIntro
-        title="Simple terms for a local app."
-        subtitle="Use Noven as a personal habit tool. Keep anything sensitive out of exported text unless you choose to share it."
+        title={t("legal.termsHeading")}
+        subtitle={t("legal.termsSubtitle")}
         variant="heading"
       />
 
       <View style={{ gap: spacing.componentGap }}>
-        {sections.map((section) => (
-          <View key={section.title} style={{ gap: spacing.smallGap }}>
-            <Text variant="caption">{section.title.toUpperCase()}</Text>
+        {sections.map(([title, body]) => (
+          <View key={title} style={{ gap: spacing.smallGap }}>
+            <Text variant="caption">{t(title).toUpperCase()}</Text>
             <Text color="muted" variant="body">
-              {section.body}
+              {t(body)}
             </Text>
+            {title === "legal.sections.appleEula" ? (
+              <Pressable hitSlop={8} onPress={() => Linking.openURL(appleEulaUrl)}>
+                {({ pressed }) => (
+                  <Text
+                    variant="small"
+                    style={{
+                      color: colors.foreground,
+                      fontFamily: "Inter SemiBold",
+                      opacity: pressed ? 0.62 : 1,
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    {appleEulaUrl}
+                  </Text>
+                )}
+              </Pressable>
+            ) : null}
           </View>
         ))}
       </View>

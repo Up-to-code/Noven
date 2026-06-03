@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
+import { useHabitCreationGate } from "@/hooks/useHabitCreationGate";
 import { playFeedback } from "@/lib/feedback";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
@@ -66,6 +67,8 @@ export function ScreenHeader({ showBack = false, showSettings = false, style, ti
 }
 
 function HeaderAction({ avatarId, type }: { avatarId?: string; type: "add" | "avatar" }) {
+  const openCreateHabit = useHabitCreationGate("/(tabs)");
+
   if (type === "avatar") {
     return (
       <Pressable
@@ -88,7 +91,7 @@ function HeaderAction({ avatarId, type }: { avatarId?: string; type: "add" | "av
     <Pressable
       onPress={() => {
         playFeedback("add");
-        router.push("/habits/create");
+        openCreateHabit();
       }}
       style={({ pressed }) => ({
         width: 36,

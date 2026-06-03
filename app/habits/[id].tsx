@@ -23,6 +23,7 @@ import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
 import { useResponsiveMetrics } from "@/hooks/useResponsiveMetrics";
+import { translate, useAppLocale } from "@/localization";
 import { playFeedback } from "@/lib/feedback";
 import { completionRate, currentStreak, weeklyCompletionText } from "@/lib/habitAnalytics";
 import { useHabitStore } from "@/store/habitStore";
@@ -30,6 +31,7 @@ import { useReflectionStore } from "@/store/reflectionStore";
 import type { Habit } from "@/types/habit";
 
 export default function HabitDetailScreen() {
+  const { t } = useAppLocale();
   const { id } = useLocalSearchParams<{ id: string }>();
   const metrics = useResponsiveMetrics({ horizontalPadding: spacing.screenHorizontal });
   const habit = useHabitStore((state) => state.getHabit(id));
@@ -43,9 +45,9 @@ export default function HabitDetailScreen() {
     return (
       <Screen>
         <ScreenHeader showBack />
-        <Text variant="heading">Habit not found</Text>
+        <Text variant="heading">{t("habits.notFoundTitle")}</Text>
         <Text color="muted" variant="body">
-          This habit may have been removed from your local system.
+          {t("habits.notFoundBody")}
         </Text>
       </Screen>
     );
@@ -61,10 +63,10 @@ export default function HabitDetailScreen() {
 
   const confirmDelete = () => {
     setIsMenuOpen(false);
-    Alert.alert("Delete goal?", "This removes the goal and its local reflections.", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("habits.deleteTitle"), t("habits.deleteBody"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("habits.deleteAction"),
         style: "destructive",
         onPress: () => {
           clearReflectionsForHabit(habit.id);
@@ -80,7 +82,7 @@ export default function HabitDetailScreen() {
       <View style={{ position: "relative", zIndex: 2 }}>
         <ScreenHeader showBack />
         <Pressable
-          accessibilityLabel="Goal actions"
+          accessibilityLabel={t("habits.actionsLabel")}
           accessibilityRole="button"
           onPress={() => setIsMenuOpen((value) => !value)}
           style={{
@@ -130,7 +132,7 @@ export default function HabitDetailScreen() {
               }}
             >
               <SlidersHorizontal color={colors.foreground} size={18} strokeWidth={1.8} />
-              <Text variant="small">Edit habit settings</Text>
+              <Text variant="small">{t("habits.editSettings")}</Text>
             </Pressable>
             <View style={{ height: 1, backgroundColor: colors.border }} />
             <Pressable
@@ -145,7 +147,7 @@ export default function HabitDetailScreen() {
             >
               <Trash2 color={colors.danger} size={18} strokeWidth={1.8} />
               <Text color="danger" variant="small">
-                Delete goal
+                {t("habits.deleteGoal")}
               </Text>
             </Pressable>
           </View>
@@ -187,7 +189,7 @@ export default function HabitDetailScreen() {
         >
           <Flame color="#F28F98" size={iconSize * 0.52} strokeWidth={1.9} />
           <Text color="muted" variant="caption">
-            STREAK
+            {t("habits.streak")}
           </Text>
           <Text variant="display" style={{ fontSize: titleSize * 0.78, lineHeight: titleSize * 0.86 }}>
             {streak}
@@ -208,7 +210,7 @@ export default function HabitDetailScreen() {
         >
           <TrendingUp color="#F28F98" size={iconSize * 0.52} strokeWidth={1.9} />
           <Text color="muted" variant="caption">
-            RATE
+            {t("patterns.title")}
           </Text>
           <Text variant="display" style={{ fontSize: titleSize * 0.78, lineHeight: titleSize * 0.86 }}>
             {rate}%
@@ -227,12 +229,10 @@ export default function HabitDetailScreen() {
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.smallGap }}>
           <Info color="#F28F98" size={22} strokeWidth={1.9} />
-          <Text variant="caption">ABOUT THIS HABIT</Text>
+          <Text variant="caption">{t("habits.about")}</Text>
         </View>
         <Text color="muted" variant="body">
-          {logs.length
-            ? `${logs.length} completion${logs.length === 1 ? "" : "s"} saved for this habit.`
-            : "No completions yet.\nKeep the first repetition small."}
+          {logs.length ? `${logs.length} ${t("habits.completion", { count: logs.length })}` : t("habits.noWeeklyCompletions")}
         </Text>
       </View>
 
@@ -254,9 +254,9 @@ export default function HabitDetailScreen() {
           >
             <AlarmClock color="#F28F98" size={24} strokeWidth={1.9} />
             <View style={{ flex: 1, gap: spacing.compact }}>
-              <Text variant="caption">REMINDERS</Text>
+              <Text variant="caption">{t("habits.reminders")}</Text>
               <Text variant="body" style={{ fontSize: 24, lineHeight: 30 }}>
-                {habit.reminderTime || "Evening routine"}
+                {habit.reminderTime || t("categories.Routine")}
               </Text>
             </View>
             <ChevronRight color={colors.softText} size={22} strokeWidth={1.8} />
@@ -279,7 +279,7 @@ export default function HabitDetailScreen() {
       >
         <BarChart3 color="#F28F98" size={24} strokeWidth={1.9} />
         <View style={{ flex: 1, gap: spacing.compact }}>
-          <Text variant="caption">WEEKLY PROGRESS</Text>
+          <Text variant="caption">{t("habits.weeklyProgress")}</Text>
           <Text color="muted" variant="body">
             {weeklyCompletionText(habitLogs, habit.id)}
           </Text>
@@ -299,13 +299,14 @@ export default function HabitDetailScreen() {
 
 function frequencySummary(habit: Habit) {
   if (habit.reminderTime) {
-    return `1 time daily, spaced by ${habit.frequency || "your rhythm"}.`;
+    return habit.frequency;
   }
 
-  return habit.frequency || "A quiet routine for your system.";
+  return habit.frequency || translate("habits.rhythmSubtitle");
 }
 
 function SwipeCompleteButton({ height, onComplete }: { height: number; onComplete: () => void }) {
+  const { t } = useAppLocale();
   const translateX = useRef(new Animated.Value(0)).current;
   const currentTranslateRef = useRef(0);
   const grabOffsetRef = useRef(0);
@@ -335,6 +336,27 @@ function SwipeCompleteButton({ height, onComplete }: { height: number; onComplet
       stiffness: 180,
       useNativeDriver: true,
     }).start();
+  };
+
+  const completeSwipe = () => {
+    if (isCompleteRef.current) {
+      return;
+    }
+
+    const target = maxTranslateRef.current;
+    isCompleteRef.current = true;
+    setIsComplete(true);
+    currentTranslateRef.current = target;
+    Animated.spring(translateX, {
+      toValue: target,
+      damping: 18,
+      mass: 0.8,
+      stiffness: 190,
+      useNativeDriver: true,
+    }).start(() => {
+      playFeedback("success");
+      onComplete();
+    });
   };
 
   const panResponder = useRef(
@@ -371,24 +393,15 @@ function SwipeCompleteButton({ height, onComplete }: { height: number; onComplet
       },
       onPanResponderMove: (event) => {
         setThumbPosition(event.nativeEvent.locationX - padding - grabOffsetRef.current);
+        if (currentTranslateRef.current >= maxTranslateRef.current * 0.35) {
+          completeSwipe();
+        }
       },
       onPanResponderRelease: (_, gesture) => {
-        const target = maxTranslateRef.current;
-        const completed = currentTranslateRef.current >= target * 0.35 || gesture.vx > 0.78;
+        const completed = currentTranslateRef.current >= maxTranslateRef.current * 0.35 || gesture.vx > 0.78;
 
-        if (completed && !isCompleteRef.current) {
-          setIsComplete(true);
-          currentTranslateRef.current = target;
-          Animated.spring(translateX, {
-            toValue: target,
-            damping: 18,
-            mass: 0.8,
-            stiffness: 190,
-            useNativeDriver: true,
-          }).start(() => {
-            playFeedback("success");
-            onComplete();
-          });
+        if (completed) {
+          completeSwipe();
           return;
         }
 
@@ -425,7 +438,7 @@ function SwipeCompleteButton({ height, onComplete }: { height: number; onComplet
         }}
       >
         <Text color="inverse" variant="body" style={{ fontFamily: "Inter SemiBold", fontSize: 15, lineHeight: 22 }}>
-          Swipe done
+          {t("habits.swipeComplete")}
         </Text>
         <Sparkle color={colors.background} size={16} strokeWidth={1.8} />
       </View>

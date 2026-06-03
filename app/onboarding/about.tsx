@@ -9,15 +9,17 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { aboutSubtitle, firstName } from "@/content/personalization";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
 const features = [
-  ["Personalized", "Built around how your mind works."],
-  ["Adaptive", "Changes as your habits evolve."],
-  ["Minimal", "Clarity over complexity."],
+  ["onboarding.featurePersonalizedTitle", "onboarding.featurePersonalizedBody"],
+  ["onboarding.featureAdaptiveTitle", "onboarding.featureAdaptiveBody"],
+  ["onboarding.featureMinimalTitle", "onboarding.featureMinimalBody"],
 ];
 
 export default function AboutNovenScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const selectedMbti = useOnboardingStore((state) => state.selectedMbti);
   const selectedFocus = useOnboardingStore((state) => state.selectedFocus);
@@ -35,7 +37,7 @@ export default function AboutNovenScreen() {
 
       <View style={{ gap: spacing.smallGap }}>
         <Text variant="heading" style={{ maxWidth: 320 }}>
-          {resolvedName ? `Here's your Noven, ${resolvedName}.` : "Here's what Noven is."}
+          {resolvedName ? t("onboarding.aboutNamedTitle", { name: resolvedName }) : t("onboarding.aboutTitle")}
         </Text>
         <Text variant="body" color="muted" style={{ maxWidth: 310 }}>
           {aboutSubtitle(selectedMbti, selectedFocus)}
@@ -45,16 +47,16 @@ export default function AboutNovenScreen() {
       <View style={{ gap: spacing.smallGap }}>
         {features.map(([title, description]) => (
           <Card key={title} variant="outline">
-            <Text variant="body">{title}</Text>
+            <Text variant="body">{t(title)}</Text>
             <Text variant="small" color="muted">
-              {description}
+              {t(description)}
             </Text>
           </Card>
         ))}
       </View>
 
       <ActionPanel style={{ marginTop: "auto" }}>
-        <Button label="Continue" onPress={() => router.push("/onboarding/future")} />
+        <Button label={t("common.continue")} onPress={() => router.push("/onboarding/future")} />
       </ActionPanel>
     </Screen>
   );

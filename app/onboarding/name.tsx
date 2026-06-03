@@ -13,16 +13,17 @@ import { Screen } from "@/components/ui/Screen";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
-const nameSchema = z.object({
-  name: z.string().trim().min(1, "Enter your name"),
-});
-
-type NameForm = z.infer<typeof nameSchema>;
+type NameForm = { name: string };
 
 export default function NameInputScreen() {
+  const { t } = useAppLocale();
   const setName = useOnboardingStore((state) => state.setName);
+  const nameSchema = z.object({
+    name: z.string().trim().min(1, t("onboarding.nameRequired")),
+  });
   const {
     control,
     handleSubmit,
@@ -55,7 +56,7 @@ export default function NameInputScreen() {
       <ScreenHeader showBack />
 
       <View style={{ gap: spacing.smallGap }}>
-        <Text variant="heading">Let's start with your name.</Text>
+        <Text variant="heading">{t("onboarding.nameTitle")}</Text>
         <Text
           variant="body"
           color="muted"
@@ -64,7 +65,7 @@ export default function NameInputScreen() {
             lineHeight: 23,
           }}
         >
-          What should we call you?
+          {t("onboarding.nameSubtitle")}
         </Text>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <Controller
@@ -75,7 +76,7 @@ export default function NameInputScreen() {
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
-                placeholder="Your name"
+                placeholder={t("onboarding.namePlaceholder")}
                 autoCapitalize="words"
                 autoCorrect={false}
                 error={errors.name?.message}
@@ -107,7 +108,7 @@ export default function NameInputScreen() {
       </View>
 
       <ActionPanel>
-        <Button label="Continue" onPress={onSubmit} />
+        <Button label={t("common.continue")} onPress={onSubmit} />
       </ActionPanel>
     </Screen>
   );

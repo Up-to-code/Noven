@@ -10,9 +10,11 @@ import { Screen } from "@/components/ui/Screen";
 import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useAppLocale();
 
   return (
     <Screen
@@ -32,7 +34,7 @@ export default function WelcomeScreen() {
             textAlign: "left",
           }}
         >
-          Understand your mind.{"\n"}Design your life.
+          {t("onboarding.welcomeTitle")}
         </Text>
         <Text
           variant="body"
@@ -45,7 +47,7 @@ export default function WelcomeScreen() {
             textAlign: "left",
           }}
         >
-          A personality-driven system for habits that truly fit you.
+          {t("onboarding.welcomeSubtitle")}
         </Text>
       </View>
 
@@ -66,7 +68,7 @@ export default function WelcomeScreen() {
       <ActionPanel style={{ paddingBottom: Math.max(insets.bottom, spacing.smallGap) }}>
         <View style={{ gap: spacing.smallGap }}>
           <Button
-            label="Continue"
+            label={t("common.continue")}
             right={<ArrowRight color={colors.background} size={24} strokeWidth={1.8} />}
             onPress={() => router.push("/onboarding/name")}
             style={{
@@ -82,6 +84,8 @@ export default function WelcomeScreen() {
 }
 
 function LegalNotice() {
+  const { t } = useAppLocale();
+
   return (
     <View
       style={{
@@ -100,7 +104,7 @@ function LegalNotice() {
           textAlign: "center",
         }}
       >
-        By continuing, you agree to Noven's terms and privacy policy.
+        {t("onboarding.legalNotice")}
       </Text>
       <View
         style={{
@@ -112,8 +116,8 @@ function LegalNotice() {
           justifyContent: "center",
         }}
       >
-        <InlineLink label="Terms" href="/legal/terms" />
-        <InlineLink label="Privacy Policy" href="/legal/privacy" />
+        <InlineLink label={t("common.terms")} href="/legal/terms" />
+        <InlineLink label={t("common.privacyPolicy")} href="/legal/privacy" />
       </View>
     </View>
   );

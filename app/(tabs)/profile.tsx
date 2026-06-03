@@ -10,12 +10,14 @@ import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { playFeedback } from "@/lib/feedback";
 import { useHabitStore } from "@/store/habitStore";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 export default function ProfileScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const avatarId = useOnboardingStore((state) => state.avatarId);
   const selectedMbti = useOnboardingStore((state) => state.selectedMbti);
@@ -56,7 +58,7 @@ export default function ProfileScreen() {
               letterSpacing: 1.6,
             }}
           >
-            {selectedMbti || "PROFILE"}
+            {selectedMbti || t("profile.profile")}
           </Text>
           <Text
             variant="heading"
@@ -68,7 +70,7 @@ export default function ProfileScreen() {
               lineHeight: 34,
             }}
           >
-            {name || "Your profile"}
+            {name || t("profile.yourProfile")}
           </Text>
           <View
             style={{
@@ -87,7 +89,7 @@ export default function ProfileScreen() {
                 lineHeight: 18,
               }}
             >
-              {habits.length} habit{habits.length === 1 ? "" : "s"}
+              {t("profile.habitCount", { count: habits.length })}
             </Text>
           </View>
         </View>
@@ -103,12 +105,12 @@ export default function ProfileScreen() {
           backgroundColor: colors.background,
         }}
       >
-        <ProfileAction icon={Wand2} label="Edit avatar" onPress={() => router.push("/profile/avatar")} />
-        <ProfileAction icon={User} label="Edit name" onPress={() => router.push("/settings/name")} showDivider />
-        <ProfileAction icon={Sparkles} label="Edit type" onPress={() => router.push("/settings/mbti")} showDivider />
+        <ProfileAction icon={Wand2} label={t("profile.editAvatar")} onPress={() => router.push("/profile/avatar")} />
+        <ProfileAction icon={User} label={t("profile.editName")} onPress={() => router.push("/settings/name")} showDivider />
+        <ProfileAction icon={Sparkles} label={t("profile.editType")} onPress={() => router.push("/settings/mbti")} showDivider />
         <ProfileAction
           icon={Crown}
-          label={isPremium ? "Manage subscription" : "Upgrade to Premium"}
+          label={isPremium ? t("profile.manageSubscription") : t("profile.upgradePremium")}
           onPress={() =>
             router.push({
               pathname: "/paywall",
@@ -120,9 +122,9 @@ export default function ProfileScreen() {
           }
           showDivider
         />
-        <ProfileAction icon={FileText} label="Terms" onPress={() => router.push("/legal/terms")} showDivider />
-        <ProfileAction icon={Shield} label="Privacy Policy" onPress={() => router.push("/legal/privacy")} showDivider />
-        <ProfileAction icon={Settings} label="All settings" onPress={() => router.push("/settings")} showDivider />
+        <ProfileAction icon={FileText} label={t("common.terms")} onPress={() => router.push("/legal/terms")} showDivider />
+        <ProfileAction icon={Shield} label={t("common.privacyPolicy")} onPress={() => router.push("/legal/privacy")} showDivider />
+        <ProfileAction icon={Settings} label={t("profile.allSettings")} onPress={() => router.push("/settings")} showDivider />
       </View>
     </Screen>
   );

@@ -43,11 +43,17 @@ If Firebase, analytics, crash reporting, sign-in, or server AI is added later, u
 
 Noven is a calm habit system built around personality, focus, and reflection.
 
-Choose your MBTI type, set a focus area, create habits, log completions, and reflect on what helped or got in the way. Noven keeps the experience quiet and local: your habit data stays on your device, and Premium can unlock a Markdown prompt export when you want to discuss your patterns with an external assistant.
+Choose your MBTI type, set a focus area, create habits, log completions, and reflect on what helped or got in the way. Noven keeps the experience quiet and local: your habit data stays on your device.
+
+Noven Premium is an optional auto-renewable subscription. Premium unlocks unlimited habit creation beyond the free two-habit limit, Markdown prompt export from your local habit history and reflections, and advanced monthly pattern details for habit progress.
 
 Designed for people who want a minimal routine tool without noisy streak pressure, ads, accounts, or social features.
 
 The app includes in-app Terms and Privacy Policy screens. Habit and reflection content stays local; Premium purchase status is handled by Apple and Adapty.
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+Subscription Terms: Payment is charged to your Apple ID at confirmation of purchase. Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period. You can manage or cancel your subscription in your App Store account settings.
 
 ## Promotional Text
 
@@ -76,6 +82,34 @@ https://your-domain.example/noven/support
 Required before submission. Publish the privacy policy in this folder and use the public URL:
 
 https://your-domain.example/noven/privacy
+
+## Terms of Use (EULA)
+
+Use Apple's standard EULA unless a custom EULA is added in App Store Connect:
+
+https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+## In-App Purchase Metadata
+
+Submit both auto-renewable subscriptions with the new app version. Do not leave either product in a developer-action-needed or ready-to-submit state.
+
+### Monthly Subscription
+
+- Reference name: Noven Premium Monthly
+- Product ID: `com.ahmedss7.noven.premium.monthly`
+- Display name: Noven Premium Monthly
+- Description: Monthly access to Noven Premium: create unlimited habits beyond the free two-habit limit, export a Markdown prompt from local habit history and reflections, and view advanced monthly pattern details.
+- Duration: 1 month
+- Review screenshot: use `screenshots/subscription-review/monthly-review-paywall-clean.png` or a fresh TestFlight screenshot showing the paywall with price, duration, benefits, Terms, Privacy, and Restore Purchases.
+
+### Annual Subscription
+
+- Reference name: Noven Premium Annual
+- Product ID: `com.ahmedss7.noven.premium.annual`
+- Display name: Noven Premium Annual
+- Description: Annual access to Noven Premium: create unlimited habits beyond the free two-habit limit, export a Markdown prompt from local habit history and reflections, and view advanced monthly pattern details.
+- Duration: 1 year
+- Review screenshot: use a fresh TestFlight screenshot showing the annual option selected with price, duration, benefits, Terms, Privacy, and Restore Purchases.
 
 ## Review Contact
 

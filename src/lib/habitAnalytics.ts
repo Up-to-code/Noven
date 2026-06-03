@@ -1,10 +1,17 @@
 import type { Habit, HabitLog } from "@/types";
+import { formatDate, translate } from "@/localization";
+import {
+  completedOnLocalDayCount,
+  dailyProgressSummary,
+  localDayKey,
+} from "@/lib/habitSchedule";
+
+export { dailyProgressSummary };
 
 const dayMs = 24 * 60 * 60 * 1000;
 
 export function dayKey(value: Date | string) {
-  const date = typeof value === "string" ? new Date(value) : value;
-  return date.toISOString().slice(0, 10);
+  return localDayKey(value);
 }
 
 export function logsForHabit(logs: HabitLog[], habitId?: string) {
@@ -13,7 +20,11 @@ export function logsForHabit(logs: HabitLog[], habitId?: string) {
 
 export function isCompletedToday(logs: HabitLog[], habitId: string) {
   const today = dayKey(new Date());
-  return logs.some((log) => log.habitId === habitId && log.completedAt.slice(0, 10) === today);
+  return logs.some((log) => log.habitId === habitId && dayKey(log.completedAt) === today);
+}
+
+export function completedTodayCount(logs: HabitLog[], habitId: string) {
+  return completedOnLocalDayCount(logs, habitId);
 }
 
 export function completionRate(logs: HabitLog[], habit?: Habit, days = 90) {
@@ -27,14 +38,14 @@ export function completionRate(logs: HabitLog[], habit?: Habit, days = 90) {
   const completedDays = new Set(
     logs
       .filter((log) => log.habitId === habit.id && new Date(log.completedAt).getTime() >= cutoff)
-      .map((log) => log.completedAt.slice(0, 10)),
+      .map((log) => dayKey(log.completedAt)),
   );
 
   return Math.min(1, completedDays.size / activeDays);
 }
 
 export function currentStreak(logs: HabitLog[], habitId?: string) {
-  const completedDays = new Set(logsForHabit(logs, habitId).map((log) => log.completedAt.slice(0, 10)));
+  const completedDays = new Set(logsForHabit(logs, habitId).map((log) => dayKey(log.completedAt)));
   let streak = 0;
   const cursor = new Date();
 
@@ -54,17 +65,17 @@ export function bestDay(logs: HabitLog[], habitId?: string) {
   });
 
   if (!counts.size) {
-    return "None yet";
+    return translate("settings.choose");
   }
 
   const [day] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
-  return new Intl.DateTimeFormat("en", { weekday: "long" }).format(new Date(2026, 0, 4 + day));
+  return formatDate(new Date(2026, 0, 4 + day), { weekday: "long" });
 }
 
 export function heatmapLevels(logs: HabitLog[], habitId?: string, days = 90) {
   const countsByDay = new Map<string, number>();
   logsForHabit(logs, habitId).forEach((log) => {
-    const key = log.completedAt.slice(0, 10);
+    const key = dayKey(log.completedAt);
     countsByDay.set(key, (countsByDay.get(key) || 0) + 1);
   });
 
@@ -92,7 +103,7 @@ export function firstHabitActivityDate(logs: HabitLog[], habit?: Habit) {
 export function heatmapDaysFromStart(logs: HabitLog[], habit?: Habit, days = 30) {
   const countsByDay = new Map<string, number>();
   logsForHabit(logs, habit?.id).forEach((log) => {
-    const key = log.completedAt.slice(0, 10);
+    const key = dayKey(log.completedAt);
     countsByDay.set(key, (countsByDay.get(key) || 0) + 1);
   });
 
@@ -133,7 +144,9 @@ export function completionSummary(logs: HabitLog[], habit?: Habit, days = 30) {
 
 export function weeklyCompletionText(logs: HabitLog[], habitId: string) {
   const days = heatmapLevels(logs, habitId, 7);
-  const labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const labels = Array.from({ length: 7 }, (_, index) =>
+    formatDate(new Date(2026, 0, 4 + index), { weekday: "short" }),
+  );
   const start = new Date();
   start.setDate(start.getDate() - 6);
 
@@ -145,7 +158,7 @@ export function weeklyCompletionText(logs: HabitLog[], habitId: string) {
     })
     .filter(Boolean);
 
-  return completed.length ? completed.join(" · ") : "No completions this week yet";
+  return completed.length ? translate("habits.weeklyCompletions", { days: completed.join(" · ") }) : translate("habits.noWeeklyCompletions");
 }
 
 export function averageCompletionRate(habits: Habit[], logs: HabitLog[], days = 90) {

@@ -10,17 +10,18 @@ import { Screen } from "@/components/ui/Screen";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Enter your name"),
-});
-
-type NameForm = z.infer<typeof schema>;
+type NameForm = { name: string };
 
 export default function SettingsNameScreen() {
+  const { t } = useAppLocale();
   const currentName = useOnboardingStore((state) => state.name);
   const setName = useOnboardingStore((state) => state.setName);
+  const schema = z.object({
+    name: z.string().trim().min(1, t("onboarding.nameRequired")),
+  });
   const {
     control,
     handleSubmit,
@@ -38,11 +39,11 @@ export default function SettingsNameScreen() {
   return (
     <Screen scroll={false} topPadding={spacing.smallGap} contentStyle={{ justifyContent: "space-between" }}>
       <View style={{ gap: spacing.componentGap }}>
-        <ScreenHeader title="Name" showBack />
+        <ScreenHeader title={t("settings.name")} showBack />
         <View style={{ gap: spacing.smallGap }}>
-          <Text variant="heading">Edit name.</Text>
+          <Text variant="heading">{t("settings.editNameTitle")}</Text>
           <Text variant="body" color="muted">
-            This is only used to personalize your local system.
+            {t("settings.editNameSubtitle")}
           </Text>
         </View>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -56,7 +57,7 @@ export default function SettingsNameScreen() {
                 error={errors.name?.message}
                 onBlur={onBlur}
                 onChangeText={onChange}
-                placeholder="Your name"
+                placeholder={t("onboarding.namePlaceholder")}
                 returnKeyType="done"
                 value={value}
                 onSubmitEditing={onSubmit}
@@ -66,7 +67,7 @@ export default function SettingsNameScreen() {
         </KeyboardAvoidingView>
       </View>
 
-      <Button disabled={isSubmitting} label="Save Name" loading={isSubmitting} onPress={onSubmit} />
+      <Button disabled={isSubmitting} label={t("settings.saveName")} loading={isSubmitting} onPress={onSubmit} />
     </Screen>
   );
 }

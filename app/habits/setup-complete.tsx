@@ -8,12 +8,16 @@ import { Screen } from "@/components/ui/Screen";
 import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { spacing } from "@/design/spacing";
+import { useHabitCreationGate } from "@/hooks/useHabitCreationGate";
 import { useResponsiveMetrics } from "@/hooks/useResponsiveMetrics";
+import { useAppLocale } from "@/localization";
 
 const completeIllustration = require("@/assets/illustrations/habit-complete-lounge.png");
 
 export default function SetupCompleteScreen() {
+  const { t } = useAppLocale();
   const metrics = useResponsiveMetrics({ horizontalPadding: spacing.screenHorizontal });
+  const openCreateHabit = useHabitCreationGate("/(tabs)/habits");
   const illustrationHeight = metrics.scaleHeight(0.46, metrics.isCompact ? 330 : 360, metrics.isRoomy ? 470 : 430);
   const illustrationWidth = Math.min(metrics.width + (metrics.isCompact ? 12 : 28), 430);
 
@@ -35,7 +39,7 @@ export default function SetupCompleteScreen() {
               maxWidth: 310,
             }}
           >
-            You're all set.
+            {t("habits.setupTitle")}
           </Text>
           <Text
             color="muted"
@@ -46,7 +50,7 @@ export default function SetupCompleteScreen() {
               maxWidth: 305,
             }}
           >
-            Your habit has been added to your system.
+            {t("habits.setupSubtitle")}
           </Text>
         </View>
         <Text
@@ -58,7 +62,7 @@ export default function SetupCompleteScreen() {
             maxWidth: 330,
           }}
         >
-          Start with one quiet repetition today.
+          {t("habits.setupBody")}
         </Text>
       </View>
 
@@ -83,7 +87,7 @@ export default function SetupCompleteScreen() {
 
       <ActionPanel style={{ gap: 12 }}>
         <Button
-          label="Start Today"
+          label={t("habits.startToday")}
           feedback="success"
           onPress={() => router.replace("/(tabs)/habits")}
           style={{
@@ -92,9 +96,9 @@ export default function SetupCompleteScreen() {
           }}
         />
         <Button
-          label="Add Another Habit"
+          label={t("habits.addAnother")}
           variant="secondary"
-          onPress={() => router.replace("/habits/create")}
+          onPress={openCreateHabit}
           style={{
             minHeight: metrics.isCompact ? 50 : 54,
             borderColor: colors.border,

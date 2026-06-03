@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 import { deleteHabit as deleteStoredHabit, saveHabit, saveHabitLog } from "@/services/database";
 import { syncHabitReminderNotifications } from "@/services/notificationService";
+import { completedTodayCount } from "@/lib/habitAnalytics";
+import { localDayKey, parseHabitDailyTarget } from "@/lib/habitSchedule";
 import type { Habit, HabitLog } from "@/types";
 
 type HabitState = {
@@ -56,26 +58,28 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   completeHabit: (habitId) => {
     let updatedHabit: Habit | undefined;
     const completedAt = new Date().toISOString();
-    const dayKey = completedAt.slice(0, 10);
-    const existingLog = get().habitLogs.find(
-      (log) => log.habitId === habitId && log.completedAt.slice(0, 10) === dayKey,
-    );
-    const habitLog: HabitLog =
-      existingLog ||
-      {
-        id: `log-${habitId}-${dayKey}`,
-        habitId,
-        userId: "local-user",
-        completedAt,
-      };
+    const habit = get().habits.find((item) => item.id === habitId);
+    const dailyTarget = parseHabitDailyTarget(habit);
+    const alreadyCompleted = completedTodayCount(get().habitLogs, habitId);
+
+    if (!habit || alreadyCompleted >= dailyTarget) {
+      return;
+    }
+
+    const habitLog: HabitLog = {
+      id: `log-${habitId}-${localDayKey(completedAt)}-${alreadyCompleted + 1}-${Date.now()}`,
+      habitId,
+      userId: "local-user",
+      completedAt,
+    };
 
     set((state) => ({
-      habitLogs: existingLog ? state.habitLogs : [habitLog, ...state.habitLogs],
+      habitLogs: [habitLog, ...state.habitLogs],
       habits: state.habits.map((habit) =>
         habit.id === habitId
           ? (updatedHabit = {
               ...habit,
-              progress: Math.min(1, habit.progress + 0.08),
+              progress: Math.min(1, (alreadyCompleted + 1) / dailyTarget),
               updatedAt: completedAt,
             })
           : habit,
@@ -84,9 +88,7 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     if (updatedHabit) {
       saveHabit(updatedHabit).catch(console.error);
     }
-    if (!existingLog) {
-      saveHabitLog(habitLog).catch(console.error);
-    }
+    saveHabitLog(habitLog).catch(console.error);
   },
   deleteHabit: (habitId) => {
     let habits: Habit[] = [];

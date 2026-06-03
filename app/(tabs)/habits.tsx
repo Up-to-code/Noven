@@ -9,30 +9,34 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { ScreenIntro } from "@/components/ui/ScreenIntro";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { useHabitCreationGate } from "@/hooks/useHabitCreationGate";
+import { useAppLocale } from "@/localization";
 import { useHabitStore } from "@/store/habitStore";
 
 export default function HabitsScreen() {
+  const { t } = useAppLocale();
   const habits = useHabitStore((state) => state.habits);
+  const openCreateHabit = useHabitCreationGate("/(tabs)/habits");
 
   return (
     <Screen topPadding={spacing.smallGap} contentStyle={{ gap: spacing.componentGap }}>
       <ScreenHeader showSettings />
       <ScreenIntro
-        title="Habits"
-        subtitle="Small routines for the system you are building."
+        title={t("habits.title")}
+        subtitle={t("habits.subtitle")}
         variant="heading"
       />
 
       {habits.length ? (
         <>
           <Button
-            label="Create habit"
+            label={t("common.createHabit")}
             icon={Plus}
             feedback="add"
-            onPress={() => router.push("/habits/create")}
+            onPress={openCreateHabit}
           />
           <Button
-            label="Discover habits"
+            label={t("common.discoverHabits")}
             variant="secondary"
             onPress={() => router.push("/habits/discovery")}
           />
@@ -42,14 +46,14 @@ export default function HabitsScreen() {
       {habits.length ? (
         <Screen.Section style={{ marginTop: spacing.smallGap }}>
           <Text variant="caption" color="muted">
-            ACTIVE SYSTEM
+            {t("habits.activeSystem")}
           </Text>
           {habits.map((habit) => (
             <HabitRow key={habit.id} habit={habit} onPress={() => router.push(`/habits/${habit.id}`)} />
           ))}
         </Screen.Section>
       ) : (
-        <AddHabitGlyph label="Add your first habit" onPress={() => router.push("/habits/create")} />
+        <AddHabitGlyph label={t("habits.addFirstHabit")} onPress={openCreateHabit} />
       )}
     </Screen>
   );

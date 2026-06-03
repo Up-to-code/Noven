@@ -26,25 +26,6 @@ export type SubscriptionProduct = {
 let activationPromise: Promise<void> | null = null;
 let cachedProducts: SubscriptionProduct[] = [];
 
-const fallbackProducts: SubscriptionProduct[] = [
-  {
-    id: subscriptionProductIds.annual,
-    title: "Annual",
-    description: "A quieter yearly system for deeper patterns.",
-    price: "$39.99",
-    period: "year",
-    product: null,
-  },
-  {
-    id: subscriptionProductIds.monthly,
-    title: "Monthly",
-    description: "Start premium month by month.",
-    price: "$4.99",
-    period: "month",
-    product: null,
-  },
-];
-
 export function isPremiumProfile(profile?: AdaptyProfile | null) {
   return profile?.accessLevels?.[premiumAccessLevelId]?.isActive === true;
 }
@@ -62,6 +43,10 @@ export async function refreshSubscriptionProfile() {
   return adapty.getProfile();
 }
 
+export function subscribeToSubscriptionProfileUpdates(onProfile: (profile: AdaptyProfile) => void) {
+  return adapty.addEventListener("onLatestProfileLoad", onProfile);
+}
+
 export async function loadSubscriptionProducts(placement: SubscriptionPlacement) {
   await initializeSubscriptions();
 
@@ -72,13 +57,19 @@ export async function loadSubscriptionProducts(placement: SubscriptionPlacement)
     return cachedProducts;
   } catch (error) {
     console.warn("Unable to load Adapty paywall products", error);
-    cachedProducts = fallbackProducts;
-    return fallbackProducts;
+    cachedProducts = [];
+    return cachedProducts;
   }
 }
 
 export async function purchaseSubscription(productId: string) {
   await initializeSubscriptions();
+
+  const currentProfile = await refreshSubscriptionProfile();
+  if (isPremiumProfile(currentProfile)) {
+    return currentProfile;
+  }
+
   const selected = cachedProducts.find((product) => product.id === productId);
 
   if (!selected?.product) {
@@ -91,6 +82,17 @@ export async function purchaseSubscription(productId: string) {
   }
 
   return null;
+}
+
+export async function ensureRestoredPremiumProfile() {
+  await initializeSubscriptions();
+  const profile = await refreshSubscriptionProfile();
+
+  if (isPremiumProfile(profile)) {
+    return profile;
+  }
+
+  return adapty.restorePurchases();
 }
 
 export async function restoreSubscriptionPurchases() {
@@ -122,7 +124,7 @@ function normalizeProducts(products: AdaptyPaywallProduct[]): SubscriptionProduc
       id: normalizeProductId(product),
       title,
       description: product.localizedDescription || `${title} access to Noven Premium.`,
-      price: product.price?.localizedString || fallbackPrice(title),
+      price: product.price?.localizedString || "",
       period: product.subscription?.localizedSubscriptionPeriod || fallbackPeriod(title),
       product,
     };
@@ -145,11 +147,11 @@ function normalizeProductId(product: AdaptyPaywallProduct) {
 
 function normalizeTitle(product: AdaptyPaywallProduct) {
   if (product.localizedTitle.toLowerCase().includes("annual") || product.vendorProductId.includes("annual")) {
-    return "Annual";
+    return "Noven Premium Annual";
   }
 
   if (product.localizedTitle.toLowerCase().includes("monthly") || product.vendorProductId.includes("monthly")) {
-    return "Monthly";
+    return "Noven Premium Monthly";
   }
 
   return product.localizedTitle || "Premium";
@@ -157,8 +159,4 @@ function normalizeTitle(product: AdaptyPaywallProduct) {
 
 function fallbackPeriod(title: string) {
   return title.includes("Annual") ? "year" : "month";
-}
-
-function fallbackPrice(title: string) {
-  return title.includes("Annual") ? "$39.99" : "$4.99";
 }

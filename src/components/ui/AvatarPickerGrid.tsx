@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/Text";
 import { avatarOptions } from "@/content/avatars";
 import { spacing } from "@/design/spacing";
 import { playFeedback } from "@/lib/feedback";
+import { useAppLocale } from "@/localization";
 
 type AvatarPickerGridProps = {
   selectedAvatarId?: string;
@@ -28,6 +29,7 @@ function getGridMetrics(width: number, height: number) {
 }
 
 export function AvatarPickerGrid({ onSelect, selectedAvatarId }: AvatarPickerGridProps) {
+  const { t } = useAppLocale();
   const { width, height } = useWindowDimensions();
   const metrics = getGridMetrics(width, height);
 
@@ -74,7 +76,7 @@ export function AvatarPickerGrid({ onSelect, selectedAvatarId }: AvatarPickerGri
                 lineHeight: 18,
               }}
             >
-              {avatar.label}
+              {t(`profile.avatars.${avatar.id}`)}
             </Text>
           </Pressable>
         );

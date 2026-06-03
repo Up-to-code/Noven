@@ -24,7 +24,7 @@ Habit reminders are optional. You can turn them off in Noven or in iOS Settings.
 
 ## Premium
 
-Noven Premium is an optional auto-renewable subscription billed by Apple. Premium unlocks prompt export and advanced pattern details. You can manage or cancel your subscription from your Apple ID subscription settings.
+Noven Premium is an optional auto-renewable subscription billed by Apple. Premium unlocks unlimited habit creation beyond the free two-habit limit, prompt export, and advanced monthly pattern details. You can manage or cancel your subscription from your Apple ID subscription settings.
 
 Core habit creation remains available without Premium.
 

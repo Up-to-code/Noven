@@ -10,29 +10,34 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { ScreenIntro } from "@/components/ui/ScreenIntro";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { useCanCreateHabit, useHabitCreationGate } from "@/hooks/useHabitCreationGate";
+import { useAppLocale } from "@/localization";
 import { useHabitStore } from "@/store/habitStore";
 
 const categories = ["Focus", "Mind", "Energy", "Routine"];
 
 export default function HabitDiscoveryScreen() {
+  const { t } = useAppLocale();
   const addHabit = useHabitStore((state) => state.addHabit);
   const recommendedHabits = useHabitStore((state) => state.recommendedHabits);
+  const canCreateHabit = useCanCreateHabit();
+  const openCreateHabit = useHabitCreationGate("/habits/discovery");
   const [selectedCategory, setSelectedCategory] = useState("Focus");
   const habits = recommendedHabits.filter((habit) => habit.category === selectedCategory);
 
   return (
     <Screen topPadding={spacing.smallGap} contentStyle={{ gap: spacing.componentGap }}>
-      <ScreenHeader title="Habits" showBack />
+      <ScreenHeader title={t("habits.title")} showBack />
       <ScreenIntro
-        title="Discover habits"
-        subtitle="Recommended routines for your current system."
+        title={t("habits.discoverTitle")}
+        subtitle={t("habits.discoverSubtitle")}
         variant="heading"
       />
       <Chip.Group>
         {categories.map((category) => (
           <Chip
             key={category}
-            label={category}
+            label={t(`categories.${category}`)}
             selected={category === selectedCategory}
             onPress={() => setSelectedCategory(category)}
           />
@@ -47,10 +52,21 @@ export default function HabitDiscoveryScreen() {
               {habit.description}
             </Text>
             <Button
-              label="Add Habit"
+              label={t("habits.addHabit")}
               icon={Plus}
               variant="secondary"
               onPress={() => {
+                if (!canCreateHabit) {
+                  router.push({
+                    pathname: "/paywall",
+                    params: {
+                      placement: "settings",
+                      returnTo: "/habits/discovery",
+                    },
+                  });
+                  return;
+                }
+
                 addHabit({
                   ...habit,
                   id: `${habit.id}-${Date.now()}`,
@@ -65,15 +81,15 @@ export default function HabitDiscoveryScreen() {
         ))}
         {!habits.length ? (
           <Card variant="surface">
-            <Text variant="body">No recommendations yet.</Text>
+            <Text variant="body">{t("habits.noRecommendations")}</Text>
             <Text variant="small" color="muted">
-              Create your own habit for this category.
+              {t("habits.noRecommendationsBody")}
             </Text>
             <Button
-              label="Create Habit"
+              label={t("common.createHabit")}
               icon={Plus}
               variant="secondary"
-              onPress={() => router.push("/habits/create")}
+              onPress={openCreateHabit}
               style={{ marginTop: spacing.componentGap }}
             />
           </Card>

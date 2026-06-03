@@ -4,7 +4,7 @@ Paste this into App Review Notes.
 
 ## Overview
 
-Noven is a local-first iOS habit and reflection app. It does not require an account, external AI service, or network connection for the core habit experience. Noven Premium is an optional auto-renewable subscription for prompt export and advanced pattern details.
+Noven is a local-first iOS habit and reflection app. It does not require an account, external AI service, or network connection for the core habit experience. Noven Premium is an optional auto-renewable subscription for unlimited habit creation beyond the free two-habit limit, prompt export, and advanced monthly pattern details.
 
 ## How to Test
 
@@ -75,7 +75,18 @@ Noven includes optional auto-renewable subscriptions:
 - Monthly: `com.ahmedss7.noven.premium.monthly`
 - Annual: `com.ahmedss7.noven.premium.annual`
 
-Premium unlocks prompt export and advanced monthly pattern details. Core habit creation remains usable without Premium. Restore Purchases is available on the Premium screen.
+Premium unlocks unlimited habit creation beyond the free two-habit limit, prompt export, and advanced monthly pattern details. Core habit creation remains usable without Premium. Restore Purchases is available on the Premium screen.
+
+Required subscription metadata is present in the app and App Store Connect:
+
+- Monthly and Annual subscription titles
+- Subscription duration and localized price loaded from Apple
+- Clear Premium benefits
+- Functional Terms and Privacy links on the Premium screen
+- Privacy Policy URL in App Store Connect
+- Apple standard EULA link in the App Description
+
+The Monthly and Annual in-app purchase products are submitted for review with this app version and include App Review screenshots.
 
 ## Network
 

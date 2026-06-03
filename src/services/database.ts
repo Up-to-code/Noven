@@ -356,6 +356,7 @@ export async function loadPreferences() {
   const preferences = Object.fromEntries(rows.map((row) => [row.key, row.value]));
   return {
     analyticsRangeDays: Number(preferences.analyticsRangeDays || 30),
+    languageOverride: preferences.languageOverride,
     largeTextEnabled: preferences.largeTextEnabled === "true",
     milestoneAlertsEnabled: preferences.milestoneAlertsEnabled !== "false",
     reducedMotionEnabled: preferences.reducedMotionEnabled === "true",

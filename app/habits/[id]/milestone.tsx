@@ -11,6 +11,7 @@ import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
 import { useResponsiveMetrics } from "@/hooks/useResponsiveMetrics";
+import { useAppLocale } from "@/localization";
 import { currentStreak } from "@/lib/habitAnalytics";
 import { firstName } from "@/content/personalization";
 import { useHabitStore } from "@/store/habitStore";
@@ -19,6 +20,7 @@ import { useOnboardingStore } from "@/store/onboardingStore";
 const milestoneIllustration = require("@/assets/illustrations/name-writing-desk.png");
 
 export default function MilestoneScreen() {
+  const { t } = useAppLocale();
   const { id } = useLocalSearchParams<{ id: string }>();
   const metrics = useResponsiveMetrics({ horizontalPadding: spacing.screenHorizontal });
   const name = useOnboardingStore((state) => state.name);
@@ -55,7 +57,7 @@ export default function MilestoneScreen() {
               textAlign: "center",
             }}
           >
-            Great job{displayName ? `, ${displayName}` : ""}.
+            {displayName ? `${t("milestone.title")} ${displayName}.` : t("milestone.title")}
           </Text>
           <Text
             color="muted"
@@ -66,7 +68,7 @@ export default function MilestoneScreen() {
               textAlign: "center",
             }}
           >
-            You've built momentum. Keep going.
+            {t("milestone.subtitle", { habit: t("tabs.habits").toLowerCase() })}
           </Text>
         </View>
 
@@ -88,7 +90,7 @@ export default function MilestoneScreen() {
         >
           <View style={{ gap: spacing.componentGap }}>
             <Text color="muted" variant="caption">
-              STREAK
+              {t("milestone.streakLabel")}
             </Text>
             <Text
               variant="display"
@@ -97,7 +99,7 @@ export default function MilestoneScreen() {
                 lineHeight: metrics.scaleWidth(0.115, 40, 54),
               }}
             >
-              {streak} day{streak === 1 ? "" : "s"}
+              {t("milestone.streakValue", { count: streak })}
             </Text>
           </View>
           <Flame color="#F28F98" size={metrics.scaleWidth(0.076, 28, 38)} strokeWidth={1.8} />
@@ -106,7 +108,7 @@ export default function MilestoneScreen() {
 
       <ActionPanel style={{ gap: 12 }}>
         <Button
-          label="View Progress"
+          label={t("milestone.viewProgress")}
           onPress={() => router.replace("/(tabs)/patterns")}
           style={{
             minHeight: metrics.scaleHeight(0.064, 52, 58),
@@ -114,7 +116,7 @@ export default function MilestoneScreen() {
           }}
         />
         <Button
-          label="Continue"
+          label={t("common.continue")}
           variant="secondary"
           onPress={() => router.replace(`/habits/${id}`)}
           style={{

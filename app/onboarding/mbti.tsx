@@ -9,6 +9,7 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { namePrefix } from "@/content/personalization";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
 const mbtiTypes = [
@@ -31,6 +32,7 @@ const mbtiTypes = [
 ];
 
 export default function MbtiSelectionScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const selectedMbti = useOnboardingStore((state) => state.selectedMbti);
   const setMbti = useOnboardingStore((state) => state.setMbti);
@@ -47,16 +49,16 @@ export default function MbtiSelectionScreen() {
 
       <View style={{ gap: spacing.smallGap }}>
         <Text variant="heading" style={{ maxWidth: 310 }}>
-          {namePrefix(name)}what's your MBTI type?
+          {t("onboarding.mbtiTitle", { prefix: namePrefix(name) })}
         </Text>
         <Text variant="body" color="muted" style={{ maxWidth: 300 }}>
-          This helps personalize your system.
+          {t("onboarding.mbtiSubtitle")}
         </Text>
       </View>
 
       <View style={{ gap: spacing.componentGap }}>
         <Text variant="caption" color="soft">
-          SELECT ONE
+          {t("onboarding.selectOne")}
         </Text>
         <Chip.Group style={{ justifyContent: "space-between", rowGap: spacing.smallGap }}>
           {mbtiTypes.map((type) => (
@@ -76,7 +78,7 @@ export default function MbtiSelectionScreen() {
 
       <ActionPanel style={{ marginTop: "auto" }}>
         <Button
-          label="I don't know yet"
+          label={t("onboarding.unknownMbti")}
           variant="ghost"
           style={{ minHeight: 44 }}
           onPress={() => {
@@ -85,7 +87,7 @@ export default function MbtiSelectionScreen() {
           }}
         />
         <Button
-          label="Continue"
+          label={t("common.continue")}
           disabled={!selectedMbti}
           onPress={() => router.push("/onboarding/focus")}
         />

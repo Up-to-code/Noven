@@ -8,6 +8,7 @@ import {
   Clock,
   ChevronRight,
   Database,
+  Languages,
   Crown,
   FileText,
   RotateCcw,
@@ -25,10 +26,13 @@ import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
+import { languageOptions, localizeStoredFocus, useAppLocale } from "@/localization";
+import { habitReminderOccurrences } from "@/lib/habitSchedule";
 import { resetLocalData } from "@/services/database";
 import {
   cancelScheduledHabitReminders,
   getNotificationPermissionStatus,
+  getNotificationDebugSnapshot,
   syncHabitReminderNotifications,
 } from "@/services/notificationService";
 import { useHabitStore } from "@/store/habitStore";
@@ -38,6 +42,7 @@ import { useReflectionStore } from "@/store/reflectionStore";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 export default function SettingsScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const selectedMbti = useOnboardingStore((state) => state.selectedMbti);
   const selectedFocus = useOnboardingStore((state) => state.selectedFocus);
@@ -50,6 +55,7 @@ export default function SettingsScreen() {
   const isPremium = useSubscriptionStore((state) => state.isPremium);
   const {
     analyticsRangeDays,
+    languageOverride,
     remindersEnabled,
     setAnalyticsRangeDays,
     setRemindersEnabled,
@@ -57,7 +63,7 @@ export default function SettingsScreen() {
   const [notificationStatus, setNotificationStatus] = useState<string>("unknown");
 
   const nextReminder = habits.find((habit) => habit.reminderTime)?.reminderTime;
-  const scheduledHabitCount = habits.filter((habit) => habit.reminderTime).length;
+  const scheduledHabitCount = habits.reduce((sum, habit) => sum + habitReminderOccurrences(habit).length, 0);
   const remindersReady = remindersEnabled && notificationStatus === "granted";
 
   useEffect(() => {
@@ -81,16 +87,16 @@ export default function SettingsScreen() {
     }
 
     Alert.alert(
-      "Allow habit reminders?",
-      "Noven uses local notifications only for the habit reminder times you set. You can turn them off here at any time.",
+      t("settings.allowRemindersTitle"),
+      t("settings.allowRemindersBody"),
       [
         {
-          text: "Not Now",
+          text: t("settings.notNow"),
           style: "cancel",
           onPress: () => setRemindersEnabled(false),
         },
         {
-          text: "Continue",
+          text: t("common.continue"),
           onPress: () => {
             enableHabitReminders().catch(console.error);
           },
@@ -103,17 +109,38 @@ export default function SettingsScreen() {
     setRemindersEnabled(true);
     const result = await syncHabitReminderNotifications(habits, true);
     setNotificationStatus(await getNotificationPermissionStatus());
+    if (__DEV__) {
+      const snapshot = await getNotificationDebugSnapshot();
+      console.debug("[notifications] settings enable snapshot", snapshot);
+    }
     if (!result.granted) {
       setRemindersEnabled(false);
-      Alert.alert("Notifications are off", "Allow notifications in iOS Settings to receive habit reminders.");
+      Alert.alert(t("settings.notificationsOffTitle"), t("settings.notificationsOffBody"));
     }
   };
 
+  const showNotificationDebug = async () => {
+    const snapshot = await getNotificationDebugSnapshot();
+    const permission =
+      snapshot.permissions && "status" in snapshot.permissions
+        ? snapshot.permissions.status
+        : notificationStatus;
+    console.debug("[notifications] manual debug snapshot", snapshot);
+    Alert.alert(
+      t("settings.notificationsDebugTitle"),
+      t("settings.notificationsDebugBody", {
+        permission,
+        saved: snapshot.scheduledByPreference.length,
+        scheduled: snapshot.scheduledNativeCount,
+      }),
+    );
+  };
+
   const resetAll = () => {
-    Alert.alert("Reset local data?", "This clears your profile, habits, logs, and reflections from this device.", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("settings.resetTitle"), t("settings.resetBody"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Reset",
+        text: t("common.reset"),
         style: "destructive",
         onPress: () => {
           resetLocalData().catch(console.error);
@@ -128,32 +155,43 @@ export default function SettingsScreen() {
 
   return (
     <Screen topPadding={spacing.compact} contentStyle={{ gap: spacing.componentGap + spacing.compact }}>
-      <ScreenHeader title="Settings" showBack />
+      <ScreenHeader title={t("settings.title")} showBack />
 
-      <SettingsSection label="IDENTITY">
+      <SettingsSection label={t("settings.identity")}>
         <SettingsGroup>
-          <SettingRow icon={User} label="Name" value={name || "Add"} onPress={() => router.push("/settings/name")} />
+          <SettingRow icon={User} label={t("settings.name")} value={name || t("settings.add")} onPress={() => router.push("/settings/name")} />
           <SettingRow
             icon={Sparkles}
-            label="MBTI"
-            value={selectedMbti || "Choose"}
+            label={t("settings.mbti")}
+            value={selectedMbti || t("settings.choose")}
             onPress={() => router.push("/settings/mbti")}
           />
           <SettingRow
             icon={BookOpenText}
-            label="Focus"
-            value={selectedFocus || "Choose"}
+            label={t("settings.focus")}
+            value={selectedFocus ? localizeStoredFocus(selectedFocus, t) : t("settings.choose")}
             onPress={() => router.push("/settings/focus")}
           />
         </SettingsGroup>
       </SettingsSection>
 
-      <SettingsSection label="NOTIFICATIONS">
+      <SettingsSection label={t("settings.language.section")}>
+        <SettingsGroup>
+          <SettingRow
+            icon={Languages}
+            label={t("settings.language.row")}
+            value={t(languageOptions.find((option) => option.locale === languageOverride)?.labelKey || "settings.language.system")}
+            onPress={() => router.push("/settings/language")}
+          />
+        </SettingsGroup>
+      </SettingsSection>
+
+      <SettingsSection label={t("settings.notifications")}>
         <SettingsGroup>
           <SettingRow
             icon={Bell}
-            label="Habit reminders"
-            value={remindersReady ? "On" : "Off"}
+            label={t("settings.habitReminders")}
+            value={remindersReady ? t("settings.on") : t("settings.off")}
             switchValue={remindersReady}
             onSwitchValueChange={(value) => {
               toggleHabitReminders(value).catch(console.error);
@@ -161,14 +199,14 @@ export default function SettingsScreen() {
           />
           <SettingRow
             icon={Clock}
-            label="Reminder times"
-            value={nextReminder ? `${scheduledHabitCount} time${scheduledHabitCount === 1 ? "" : "s"}` : "Set in habits"}
-            onPress={() => router.push("/(tabs)/habits")}
+            label={t("settings.reminderTimes")}
+            value={nextReminder ? t("settings.timeCount", { count: scheduledHabitCount }) : t("settings.setInHabits")}
+            onPress={__DEV__ ? showNotificationDebug : () => router.push("/(tabs)/habits")}
           />
         </SettingsGroup>
       </SettingsSection>
 
-      <SettingsSection label="LOCAL DATA">
+      <SettingsSection label={t("settings.localData")}>
         <View
           style={{
             borderRadius: radius.input,
@@ -181,15 +219,18 @@ export default function SettingsScreen() {
           <View style={{ flexDirection: "row", gap: spacing.smallGap + spacing.compact, alignItems: "center" }}>
             <Database color={colors.foreground} size={18} strokeWidth={1.6} />
             <Text variant="small" style={{ flex: 1 }}>
-              {habits.length} habit{habits.length === 1 ? "" : "s"} · {habitLogs.length} completion
-              {habitLogs.length === 1 ? "" : "s"} · {reflections.length} reflection
-              {reflections.length === 1 ? "" : "s"}
+              {t("settings.localSummary", {
+                count: Math.max(habits.length, habitLogs.length, reflections.length),
+                completions: habitLogs.length,
+                habits: habits.length,
+                reflections: reflections.length,
+              })}
             </Text>
           </View>
         </View>
       </SettingsSection>
 
-      <SettingsSection label="ANALYTICS">
+      <SettingsSection label={t("settings.analytics")}>
         <View
           style={{
             gap: spacing.smallGap,
@@ -204,10 +245,10 @@ export default function SettingsScreen() {
           <View style={{ flexDirection: "row", gap: spacing.smallGap + spacing.compact, alignItems: "center" }}>
             <CalendarDays color={colors.foreground} size={18} strokeWidth={1.6} />
             <Text variant="small" style={{ flex: 1 }}>
-              Pattern range
+              {t("settings.patternRange")}
             </Text>
             <Text variant="small" color="muted">
-              {analyticsRangeDays} days
+              {t("patterns.days", { count: analyticsRangeDays })}
             </Text>
           </View>
           <View style={{ flexDirection: "row", gap: spacing.smallGap }}>
@@ -226,7 +267,7 @@ export default function SettingsScreen() {
                 })}
               >
                 <Text variant="small" color={analyticsRangeDays === range ? "inverse" : "default"}>
-                  {range}d
+                  {t("settings.daysShort", { count: range })}
                 </Text>
               </Pressable>
             ))}
@@ -234,12 +275,12 @@ export default function SettingsScreen() {
         </View>
       </SettingsSection>
 
-      <SettingsSection label="APP INFO">
+      <SettingsSection label={t("settings.appInfo")}>
         <SettingsGroup>
           <SettingRow
             icon={Crown}
-            label={isPremium ? "Manage subscription" : "Upgrade to Premium"}
-            value={isPremium ? "Active" : "Unlock"}
+            label={isPremium ? t("profile.manageSubscription") : t("profile.upgradePremium")}
+            value={isPremium ? t("settings.active") : t("settings.unlock")}
             onPress={() =>
               router.push({
                 pathname: "/paywall",
@@ -250,14 +291,14 @@ export default function SettingsScreen() {
               })
             }
           />
-          <SettingRow icon={Shield} label="Privacy Policy" value="Local only" onPress={() => router.push("/legal/privacy")} />
-          <SettingRow icon={FileText} label="Terms" value="Use" onPress={() => router.push("/legal/terms")} />
+          <SettingRow icon={Shield} label={t("common.privacyPolicy")} value={t("settings.localOnly")} onPress={() => router.push("/legal/privacy")} />
+          <SettingRow icon={FileText} label={t("common.terms")} value={t("settings.use")} onPress={() => router.push("/legal/terms")} />
         </SettingsGroup>
       </SettingsSection>
 
       <View style={{ gap: spacing.smallGap, paddingTop: spacing.compact }}>
-        <Button icon={Database} label="Export Prompt" variant="secondary" onPress={() => router.push("/mbti-insights")} />
-        <Button icon={RotateCcw} label="Reset Local Data" variant="danger" onPress={resetAll} />
+        <Button icon={Database} label={t("settings.exportPrompt")} variant="secondary" onPress={() => router.push("/mbti-insights")} />
+        <Button icon={RotateCcw} label={t("settings.resetLocalData")} variant="danger" onPress={resetAll} />
       </View>
     </Screen>
   );

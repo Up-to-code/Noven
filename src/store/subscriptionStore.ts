@@ -1,12 +1,14 @@
 import { create } from "zustand";
 
 import {
+  ensureRestoredPremiumProfile,
   initializeSubscriptions,
   isPremiumProfile,
   loadSubscriptionProducts,
   purchaseSubscription,
   refreshSubscriptionProfile,
   restoreSubscriptionPurchases,
+  subscribeToSubscriptionProfileUpdates,
   type SubscriptionPlacement,
   type SubscriptionProduct,
 } from "@/services/subscriptionService";
@@ -20,8 +22,11 @@ type SubscriptionState = {
   loadPaywall: (placement: SubscriptionPlacement) => Promise<void>;
   purchase: (productId: string) => Promise<boolean>;
   refreshEntitlement: () => Promise<void>;
+  restoreEntitlementIfNeeded: () => Promise<boolean>;
   restorePurchases: () => Promise<boolean>;
 };
+
+let profileSubscription: { remove: () => void } | null = null;
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   isLoading: false,
@@ -32,6 +37,11 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     set({ isLoading: true, lastError: undefined });
     try {
       await initializeSubscriptions();
+      if (!profileSubscription) {
+        profileSubscription = subscribeToSubscriptionProfileUpdates((profile) => {
+          set({ isPremium: isPremiumProfile(profile), lastError: undefined });
+        });
+      }
       await get().refreshEntitlement();
     } catch (error) {
       set({ lastError: messageFromError(error) });
@@ -73,6 +83,17 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set({ isPremium: isPremiumProfile(profile), lastError: undefined });
     } catch (error) {
       set({ lastError: messageFromError(error) });
+    }
+  },
+  restoreEntitlementIfNeeded: async () => {
+    try {
+      const profile = await ensureRestoredPremiumProfile();
+      const isPremium = isPremiumProfile(profile);
+      set({ isPremium, lastError: undefined });
+      return isPremium;
+    } catch (error) {
+      set({ lastError: messageFromError(error) });
+      return false;
     }
   },
   restorePurchases: async () => {

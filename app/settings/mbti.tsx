@@ -7,6 +7,7 @@ import { Screen } from "@/components/ui/Screen";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
 const mbtiTypes = [
@@ -29,6 +30,7 @@ const mbtiTypes = [
 ];
 
 export default function SettingsMbtiScreen() {
+  const { t } = useAppLocale();
   const selectedMbti = useOnboardingStore((state) => state.selectedMbti);
   const setMbti = useOnboardingStore((state) => state.setMbti);
 
@@ -41,15 +43,15 @@ export default function SettingsMbtiScreen() {
     <Screen topPadding={spacing.smallGap} contentStyle={{ gap: spacing.componentGap }}>
       <ScreenHeader title="MBTI" showBack />
       <View style={{ gap: spacing.smallGap }}>
-        <Text variant="heading">Edit type.</Text>
+        <Text variant="heading">{t("settings.editTypeTitle")}</Text>
         <Text variant="body" color="muted">
-          Choose the type Noven should use for personalization.
+          {t("settings.editTypeSubtitle")}
         </Text>
       </View>
 
       <View style={{ gap: spacing.componentGap }}>
         <Text variant="caption" color="soft">
-          SELECT ONE
+          {t("onboarding.selectOne")}
         </Text>
         <Chip.Group style={{ justifyContent: "space-between", rowGap: spacing.smallGap }}>
           {mbtiTypes.map((type) => (
@@ -64,7 +66,7 @@ export default function SettingsMbtiScreen() {
         </Chip.Group>
       </View>
 
-      <Button label="I don't know yet" variant="secondary" onPress={() => saveAndReturn("Unknown")} />
+      <Button label={t("onboarding.unknownMbti")} variant="secondary" onPress={() => saveAndReturn("Unknown")} />
     </Screen>
   );
 }

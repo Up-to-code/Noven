@@ -9,18 +9,20 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { focusPrompt } from "@/content/personalization";
 import { spacing } from "@/design/spacing";
+import { useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
 const focusOptions = [
-  "Better focus",
-  "Consistency",
-  "Mental clarity",
-  "Routine building",
-  "Energy balance",
-  "Deep work",
+  "focusOptions.betterFocus",
+  "focusOptions.consistency",
+  "focusOptions.mentalClarity",
+  "focusOptions.routineBuilding",
+  "focusOptions.energyBalance",
+  "focusOptions.deepWork",
 ];
 
 export default function FocusSelectionScreen() {
+  const { t } = useAppLocale();
   const name = useOnboardingStore((state) => state.name);
   const selectedFocus = useOnboardingStore((state) => state.selectedFocus);
   const setFocus = useOnboardingStore((state) => state.setFocus);
@@ -40,21 +42,21 @@ export default function FocusSelectionScreen() {
           {focusPrompt(name)}
         </Text>
         <Text variant="body" color="muted" style={{ maxWidth: 300 }}>
-          Choose what matters most right now.
+          {t("onboarding.focusSubtitle")}
         </Text>
       </View>
 
       <View style={{ gap: spacing.componentGap }}>
         <Text variant="caption" color="soft">
-          SELECT ONE
+          {t("onboarding.selectOne")}
         </Text>
         <Chip.Group style={{ rowGap: spacing.smallGap }}>
           {focusOptions.map((option) => (
             <Chip
               key={option}
-              label={option}
-              selected={selectedFocus === option}
-              onPress={() => setFocus(option)}
+              label={t(option)}
+              selected={selectedFocus === t(option)}
+              onPress={() => setFocus(t(option))}
               style={{
                 minHeight: 44,
                 paddingHorizontal: spacing.componentGap,
@@ -62,7 +64,7 @@ export default function FocusSelectionScreen() {
             />
           ))}
           <Chip
-            label="Custom"
+            label={t("focusOptions.custom")}
             selected={false}
             onPress={() => router.push("/onboarding/custom-focus")}
             style={{
@@ -75,7 +77,7 @@ export default function FocusSelectionScreen() {
 
       <ActionPanel style={{ marginTop: "auto" }}>
         <Button
-          label="Continue"
+          label={t("common.continue")}
           disabled={!selectedFocus}
           onPress={() => router.push("/onboarding/about")}
         />

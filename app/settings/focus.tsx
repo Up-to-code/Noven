@@ -10,24 +10,25 @@ import { Screen } from "@/components/ui/Screen";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
+import { localizeStoredFocus, useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
-const schema = z.object({
-  focus: z.string().trim().min(2, "Add a focus to continue"),
-});
-
-type FocusForm = z.infer<typeof schema>;
+type FocusForm = { focus: string };
 
 export default function SettingsFocusScreen() {
+  const { t } = useAppLocale();
   const currentFocus = useOnboardingStore((state) => state.selectedFocus);
   const setFocus = useOnboardingStore((state) => state.setFocus);
+  const schema = z.object({
+    focus: z.string().trim().min(2, t("onboarding.customFocusRequired")),
+  });
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FocusForm>({
     resolver: zodResolver(schema),
-    defaultValues: { focus: currentFocus || "" },
+    defaultValues: { focus: currentFocus ? localizeStoredFocus(currentFocus, t) : "" },
   });
 
   const onSubmit = handleSubmit((values) => {
@@ -38,11 +39,11 @@ export default function SettingsFocusScreen() {
   return (
     <Screen scroll={false} topPadding={spacing.smallGap} contentStyle={{ justifyContent: "space-between" }}>
       <View style={{ gap: spacing.componentGap }}>
-        <ScreenHeader title="Focus" showBack />
+        <ScreenHeader title={t("settings.focus")} showBack />
         <View style={{ gap: spacing.smallGap }}>
-          <Text variant="heading">Edit focus.</Text>
+          <Text variant="heading">{t("settings.editFocusTitle")}</Text>
           <Text variant="body" color="muted">
-            Name the thing your system should support right now.
+            {t("settings.editFocusSubtitle")}
           </Text>
         </View>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -56,7 +57,7 @@ export default function SettingsFocusScreen() {
                 error={errors.focus?.message}
                 onBlur={onBlur}
                 onChangeText={onChange}
-                placeholder="Your focus"
+                placeholder={t("onboarding.customFocusPlaceholder")}
                 returnKeyType="done"
                 value={value}
                 onSubmitEditing={onSubmit}
@@ -66,7 +67,7 @@ export default function SettingsFocusScreen() {
         </KeyboardAvoidingView>
       </View>
 
-      <Button disabled={isSubmitting} label="Save Focus" loading={isSubmitting} onPress={onSubmit} />
+      <Button disabled={isSubmitting} label={t("settings.saveFocus")} loading={isSubmitting} onPress={onSubmit} />
     </Screen>
   );
 }

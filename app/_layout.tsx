@@ -18,8 +18,11 @@ import {
 } from "@expo-google-fonts/inter";
 
 import { colors } from "@/design/colors";
+import { initializeLocalization } from "@/localization";
+import { initializeAmplitude } from "@/services/amplitudeService";
 import { registerNotificationHandler } from "@/services/notificationService";
 import { loadAppData } from "@/services/database";
+import { seedScreenshotData } from "@/services/screenshotSeed";
 import { useHabitStore } from "@/store/habitStore";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { usePreferenceStore } from "@/store/preferenceStore";
@@ -45,11 +48,18 @@ export default function RootLayout() {
     let isMounted = true;
 
     loadAppData()
-      .then(({ habitLogs, habits, preferences, profile, reflections }) => {
+      .then(async ({ habitLogs, habits, preferences, profile, reflections }) => {
+        if (__DEV__ && process.env.EXPO_PUBLIC_SCREENSHOT_SEED === "true") {
+          await seedScreenshotData(process.env.EXPO_PUBLIC_SCREENSHOT_LOCALE as never);
+          ({ habitLogs, habits, preferences, profile, reflections } = await loadAppData());
+        }
+
         useOnboardingStore.getState().hydrate(profile);
         useHabitStore.getState().hydrate(habits, habitLogs);
         useReflectionStore.getState().hydrate(reflections);
         usePreferenceStore.getState().hydrate(preferences);
+        await initializeLocalization(usePreferenceStore.getState().languageOverride);
+        initializeAmplitude().catch(console.error);
         useSubscriptionStore.getState().initialize().catch(console.error);
       })
       .catch(console.error)
@@ -82,7 +92,15 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
         }}
-      />
+      >
+        <Stack.Screen
+          name="paywall"
+          options={{
+            animation: "slide_from_bottom",
+            presentation: "modal",
+          }}
+        />
+      </Stack>
     </SafeAreaProvider>
   );
 }

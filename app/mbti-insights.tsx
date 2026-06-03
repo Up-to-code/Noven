@@ -12,6 +12,7 @@ import { ScreenIntro } from "@/components/ui/ScreenIntro";
 import { Text } from "@/components/ui/Text";
 import { spacing } from "@/design/spacing";
 import { colors } from "@/design/colors";
+import { formatDate as formatLocalizedDate, localizeStoredFocus, translate as translateMarkdown, useAppLocale } from "@/localization";
 import { useHabitStore } from "@/store/habitStore";
 import { useOnboardingStore } from "@/store/onboardingStore";
 import { useReflectionStore } from "@/store/reflectionStore";
@@ -31,13 +32,14 @@ type PromptInput = {
 };
 
 const ranges: Array<{ key: RangeKey; label: string }> = [
-  { key: "7d", label: "7 days" },
-  { key: "30d", label: "30 days" },
-  { key: "90d", label: "90 days" },
-  { key: "all", label: "All" },
+  { key: "7d", label: "prompt.last7" },
+  { key: "30d", label: "prompt.last30" },
+  { key: "90d", label: "prompt.last90" },
+  { key: "all", label: "prompt.all" },
 ];
 
 export default function MbtiInsightsScreen() {
+  const { t } = useAppLocale();
   const [range, setRange] = useState<RangeKey>("30d");
   const name = useOnboardingStore((state) => state.name);
   const mbti = useOnboardingStore((state) => state.selectedMbti);
@@ -68,8 +70,9 @@ export default function MbtiInsightsScreen() {
 
   const subtitle = useMemo(() => {
     const count = filteredReflections.length;
-    return `${count} reflection${count === 1 ? "" : "s"} included from ${rangeLabel(range).toLowerCase()}.`;
-  }, [filteredReflections.length, range]);
+    const rangeText = t(ranges.find((item) => item.key === range)?.label || "prompt.all").toLowerCase();
+    return t("prompt.subtitle", { count, range: rangeText });
+  }, [filteredReflections.length, range, t]);
 
   const sharePrompt = async () => {
     await Share.share({ message: markdown });
@@ -77,19 +80,19 @@ export default function MbtiInsightsScreen() {
 
   return (
     <Screen contentStyle={{ gap: spacing.sectionGap }}>
-      <ScreenHeader title="Prompt" showBack />
-      <ScreenIntro title="Export a prompt." subtitle={subtitle} variant="heading" />
+      <ScreenHeader title={t("prompt.title")} showBack />
+      <ScreenIntro title={t("prompt.heading")} subtitle={subtitle} variant="heading" />
 
       {!isPremium ? <PremiumPromptGate /> : null}
 
       <View style={{ gap: spacing.componentGap, opacity: isPremium ? 1 : 0.35 }}>
         <View style={{ gap: spacing.smallGap }}>
-          <Text variant="caption">TIME RANGE</Text>
+          <Text variant="caption">{t("prompt.range")}</Text>
           <Chip.Group>
             {ranges.map((item) => (
               <Chip
                 key={item.key}
-                label={item.label}
+                label={t(item.label)}
                 onPress={() => setRange(item.key)}
                 selected={range === item.key}
               />
@@ -102,7 +105,7 @@ export default function MbtiInsightsScreen() {
 
       <Button
         icon={isPremium ? Copy : Crown}
-        label={isPremium ? "Share / Copy Prompt" : "Unlock Prompt Export"}
+        label={isPremium ? t("prompt.share") : t("prompt.unlock")}
         onPress={
           isPremium
             ? sharePrompt
@@ -121,16 +124,18 @@ export default function MbtiInsightsScreen() {
 }
 
 function PremiumPromptGate() {
+  const { t } = useAppLocale();
+
   return (
     <Card variant="surface" style={{ gap: spacing.smallGap }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.smallGap }}>
         <Crown color={colors.foreground} size={18} strokeWidth={1.7} />
         <Text variant="small" style={{ flex: 1 }}>
-          Prompt export is a Premium tool.
+          {t("prompt.premiumTitle")}
         </Text>
       </View>
       <Text variant="small" color="muted">
-        Your data stays local. Premium unlocks the formatted export and richer pattern review.
+        {t("prompt.premiumBody")}
       </Text>
     </Card>
   );
@@ -149,7 +154,7 @@ function filterReflectionsByRange(reflections: Reflection[], range: RangeKey) {
 function createMarkdownExtract(input: PromptInput) {
   const userName = input.name?.trim() || "me";
   const type = input.mbti && input.mbti !== "Unknown" ? input.mbti : "unknown";
-  const focus = input.focus || "not selected";
+  const focus = localizeStoredFocus(input.focus) || "not selected";
   const reflectionsByHabit = new Map<string, Reflection[]>();
 
   input.reflections.forEach((reflection) => {
@@ -197,7 +202,7 @@ function createMarkdownExtract(input: PromptInput) {
     : "- None";
 
   return [
-    "# Noven Personal Data Prompt",
+    `# ${translateMarkdown("prompt.markdownTitle")}`,
     "",
     "Act as a calm habit and personality coach. Use only the data below. Do not invent medical or psychological certainty.",
     "",
@@ -264,8 +269,8 @@ function rangeLabel(range: RangeKey) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return formatLocalizedDate(value, {
     day: "numeric",
     month: "short",
-  }).format(new Date(value));
+  });
 }

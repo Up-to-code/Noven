@@ -9,9 +9,11 @@ import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Text } from "@/components/ui/Text";
 import { futureTitle } from "@/content/personalization";
 import { spacing } from "@/design/spacing";
+import { localizeStoredFocus, useAppLocale } from "@/localization";
 import { useOnboardingStore } from "@/store/onboardingStore";
 
 export default function FutureSystemScreen() {
+  const { t } = useAppLocale();
   const { height } = useWindowDimensions();
   const name = useOnboardingStore((state) => state.name);
   const selectedFocus = useOnboardingStore((state) => state.selectedFocus);
@@ -36,7 +38,7 @@ export default function FutureSystemScreen() {
             maxWidth: 320,
           }}
         >
-          {futureTitle(name)}{"\n"}Your life.
+          {t("onboarding.futureTitle", { title: futureTitle(name) })}
         </Text>
         <Text
           variant="body"
@@ -48,8 +50,8 @@ export default function FutureSystemScreen() {
           }}
         >
           {selectedFocus
-            ? `Let's build around ${selectedFocus.toLowerCase()}.`
-            : "Let's build a system that truly fits you."}
+            ? t("onboarding.futureFocusSubtitle", { focus: localizeStoredFocus(selectedFocus, t).toLowerCase() })
+            : t("onboarding.futureSubtitle")}
         </Text>
       </View>
 
@@ -76,7 +78,7 @@ export default function FutureSystemScreen() {
 
       <ActionPanel>
         <Button
-          label="Let's Begin"
+          label={t("onboarding.begin")}
           onPress={() =>
             router.replace({
               pathname: "/paywall",

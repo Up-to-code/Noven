@@ -17,20 +17,23 @@ import { Text } from "@/components/ui/Text";
 import { colors } from "@/design/colors";
 import { radius } from "@/design/radius";
 import { spacing } from "@/design/spacing";
+import { useCanCreateHabit } from "@/hooks/useHabitCreationGate";
+import { formatTime, useAppLocale } from "@/localization";
 import { useHabitStore } from "@/store/habitStore";
 import type { HabitCategory } from "@/types";
 
-const habitSchema = z.object({
-  title: z.string().trim().min(1, "Habit name is required"),
-});
-
-type HabitForm = z.infer<typeof habitSchema>;
+type HabitForm = { title: string };
 
 const categories: HabitCategory[] = ["Focus", "Mind", "Energy", "Routine"];
-const steps = ["Name", "Type", "Time", "Repeat"];
+const steps = ["habits.steps.name", "habits.steps.type", "habits.steps.time", "habits.steps.repeat"];
 
 export default function CreateHabitScreen() {
+  const { t } = useAppLocale();
   const addHabit = useHabitStore((state) => state.addHabit);
+  const canCreateHabit = useCanCreateHabit();
+  const habitSchema = z.object({
+    title: z.string().trim().min(1, t("habits.nameRequired")),
+  });
   const isSavingRef = useRef(false);
   const [isSaving, setIsSaving] = useState(false);
   const [reminderDate, setReminderDate] = useState(() => {
@@ -58,6 +61,18 @@ export default function CreateHabitScreen() {
   const title = useWatch({ control, name: "title" }) || "";
 
   useEffect(() => {
+    if (!canCreateHabit) {
+      router.replace({
+        pathname: "/paywall",
+        params: {
+          placement: "settings",
+          returnTo: "/(tabs)/habits",
+        },
+      });
+    }
+  }, [canCreateHabit]);
+
+  useEffect(() => {
     fade.setValue(0);
     slide.setValue(10);
     Animated.parallel([
@@ -75,20 +90,31 @@ export default function CreateHabitScreen() {
   }, [fade, slide, step]);
 
   const onSubmit = handleSubmit((values) => {
+    if (!canCreateHabit) {
+      router.replace({
+        pathname: "/paywall",
+        params: {
+          placement: "settings",
+          returnTo: "/(tabs)/habits",
+        },
+      });
+      return;
+    }
+
     if (isSavingRef.current) {
       return;
     }
 
     isSavingRef.current = true;
     setIsSaving(true);
-    const reminderTime = reminderDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const reminderTime = formatTime(reminderDate);
     const now = new Date().toISOString();
     addHabit({
       id: `${values.title.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
       title: values.title,
-      description: `${timesPerDay} time${timesPerDay > 1 ? "s" : ""} daily, spaced by ${gapHours}h.`,
+      description: t("habits.frequency", { count: timesPerDay, hours: gapHours }),
       category,
-      frequency: `${timesPerDay}x daily`,
+      frequency: t("habits.dailyFrequency", { count: timesPerDay }),
       reminderTime,
       progress: 0,
       createdAt: now,
@@ -111,7 +137,7 @@ export default function CreateHabitScreen() {
   return (
     <Screen topPadding={spacing.smallGap} contentStyle={{ justifyContent: "space-between", gap: spacing.componentGap }}>
       <Screen.Section style={{ gap: spacing.sectionGap }}>
-        <ScreenHeader title="Create" showBack />
+        <ScreenHeader title={t("habits.createTitle")} showBack />
         <StepBar step={step} />
         <Animated.View
           style={{
@@ -120,7 +146,7 @@ export default function CreateHabitScreen() {
           }}
         >
           {step === 0 ? (
-            <JourneyCard eyebrow="STEP 1" title="Name the habit" subtitle="Keep it short enough to recognize at a glance.">
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 1 })} title={t("habits.nameTitle")} subtitle={t("habits.nameSubtitle")}>
               <Controller
                 control={control}
                 name="title"
@@ -129,7 +155,7 @@ export default function CreateHabitScreen() {
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
-                    placeholder="Habit name"
+                    placeholder={t("habits.namePlaceholder")}
                     error={errors.title?.message}
                     style={{ marginTop: spacing.componentGap }}
                   />
@@ -138,16 +164,16 @@ export default function CreateHabitScreen() {
             </JourneyCard>
           ) : null}
           {step === 1 ? (
-            <JourneyCard eyebrow="STEP 2" title="Choose its shape" subtitle={title ? `${title} belongs closest to...` : "Pick the closest habit family."}>
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 2 })} title={t("habits.shapeTitle")} subtitle={title ? t("habits.shapeNamedSubtitle", { title }) : t("habits.shapeSubtitle")}>
               <Chip.Group style={{ marginTop: spacing.componentGap }}>
                 {categories.map((item) => (
-                  <Chip key={item} label={item} selected={category === item} onPress={() => setCategory(item)} />
+                  <Chip key={item} label={t(`categories.${item}`)} selected={category === item} onPress={() => setCategory(item)} />
                 ))}
               </Chip.Group>
             </JourneyCard>
           ) : null}
           {step === 2 ? (
-            <JourneyCard eyebrow="STEP 3" title="Set the reminder" subtitle="A quiet nudge at the moment it fits.">
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 3 })} title={t("habits.reminderTitle")} subtitle={t("habits.reminderSubtitle")}>
               <DateTimePicker
                 value={reminderDate}
                 mode="time"
@@ -161,9 +187,9 @@ export default function CreateHabitScreen() {
             </JourneyCard>
           ) : null}
           {step === 3 ? (
-            <JourneyCard eyebrow="STEP 4" title="Tune the rhythm" subtitle="Small repetition, spaced enough to stay useful.">
-              <CounterRow label="Times per day" value={timesPerDay} min={1} max={6} onChange={setTimesPerDay} />
-              <CounterRow label="Gap between" suffix="h" value={gapHours} min={1} max={12} onChange={setGapHours} />
+            <JourneyCard eyebrow={t("habits.stepLabel", { step: 4 })} title={t("habits.rhythmTitle")} subtitle={t("habits.rhythmSubtitle")}>
+              <CounterRow label={t("habits.timesPerDay")} value={timesPerDay} min={1} max={6} onChange={setTimesPerDay} />
+              <CounterRow label={t("habits.gapBetween")} suffix="h" value={gapHours} min={1} max={12} onChange={setGapHours} />
             </JourneyCard>
           ) : null}
         </Animated.View>
@@ -172,7 +198,7 @@ export default function CreateHabitScreen() {
       <View style={{ flexDirection: "row", gap: spacing.smallGap }}>
         {step > 0 ? (
           <Button
-            label="Back"
+            label={t("common.back")}
             feedback="next"
             onPress={() => setStep((current) => Math.max(0, current - 1))}
             variant="secondary"
@@ -180,7 +206,7 @@ export default function CreateHabitScreen() {
           />
         ) : null}
         <Button
-          label={step === steps.length - 1 ? "Save Habit" : "Continue"}
+          label={step === steps.length - 1 ? t("habits.saveHabit") : t("common.continue")}
           feedback={step === steps.length - 1 ? "success" : "next"}
           loading={isSaving}
           disabled={isSaving}
@@ -193,6 +219,8 @@ export default function CreateHabitScreen() {
 }
 
 function StepBar({ step }: { step: number }) {
+  const { t } = useAppLocale();
+
   return (
     <View style={{ gap: spacing.smallGap }}>
       <View style={{ flexDirection: "row", gap: spacing.smallGap }}>
@@ -214,7 +242,7 @@ function StepBar({ step }: { step: number }) {
               }}
               numberOfLines={1}
             >
-              {item}
+              {t(item)}
             </Text>
           </View>
         ))}

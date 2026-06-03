@@ -16,11 +16,13 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ahmedss7.noven",
+      "buildNumber": "12",
       "config": {
         "usesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "com.ahmedss7.noven",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -47,7 +49,8 @@
             "deploymentTarget": "15.1"
           }
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "extra": {
       "router": {},

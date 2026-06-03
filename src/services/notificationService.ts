@@ -1,6 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import { translate } from "@/localization";
+import { habitReminderOccurrences } from "@/lib/habitSchedule";
 import { loadPreferences, savePreference } from "@/services/database";
 import type { Habit } from "@/types";
 
@@ -9,7 +11,16 @@ const reminderPreferenceKey = "scheduledHabitNotificationIds";
 type ScheduledReminder = {
   habitId: string;
   notificationId: string;
+  occurrenceIndex?: number;
 };
+
+type NotificationDebugEvent = {
+  details?: Record<string, unknown>;
+  message: string;
+  timestamp: string;
+};
+
+const debugEvents: NotificationDebugEvent[] = [];
 
 export function registerNotificationHandler() {
   Notifications.setNotificationHandler({
@@ -40,49 +51,60 @@ export async function requestNotificationPermission() {
 export async function syncHabitReminderNotifications(habits: Habit[], enabled?: boolean) {
   const preferences = await loadPreferences();
   const shouldEnable = enabled ?? preferences.remindersEnabled;
+  notificationDebug("sync:start", {
+    enabled: shouldEnable,
+    habitCount: habits.length,
+    habitsWithReminder: habits.filter((habit) => habit.reminderTime).length,
+  });
   await cancelScheduledHabitReminders();
 
   if (!shouldEnable) {
+    notificationDebug("sync:disabled");
     return { granted: false, scheduledCount: 0 };
   }
 
   const granted = await requestNotificationPermission();
   if (!granted) {
     await savePreference("remindersEnabled", false);
+    notificationDebug("sync:permission-denied");
     return { granted: false, scheduledCount: 0 };
   }
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("habit-reminders", {
-      name: "Habit reminders",
+      name: translate("notifications.channelName"),
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
 
   const scheduled: ScheduledReminder[] = [];
   for (const habit of habits) {
-    const time = parseReminderTime(habit.reminderTime);
-    if (!time) {
+    const occurrences = habitReminderOccurrences(habit);
+    if (!occurrences.length) {
+      notificationDebug("sync:skip-habit-no-time", { habitId: habit.id, reminderTime: habit.reminderTime });
       continue;
     }
 
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: habit.title,
-        body: "A small repetition is enough.",
-        data: { habitId: habit.id, type: "habit-reminder" },
-      },
-      trigger: {
-        channelId: Platform.OS === "android" ? "habit-reminders" : undefined,
-        hour: time.hour,
-        minute: time.minute,
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      },
-    });
-    scheduled.push({ habitId: habit.id, notificationId });
+    for (const occurrence of occurrences) {
+      const notificationId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: habit.title,
+          body: translate("notifications.habitReminderBody"),
+          data: { habitId: habit.id, occurrenceIndex: occurrence.index, type: "habit-reminder" },
+        },
+        trigger: {
+          channelId: Platform.OS === "android" ? "habit-reminders" : undefined,
+          hour: occurrence.hour,
+          minute: occurrence.minute,
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        },
+      });
+      scheduled.push({ habitId: habit.id, notificationId, occurrenceIndex: occurrence.index });
+    }
   }
 
   await savePreference(reminderPreferenceKey, JSON.stringify(scheduled));
+  notificationDebug("sync:complete", { scheduledCount: scheduled.length });
   return { granted: true, scheduledCount: scheduled.length };
 }
 
@@ -94,6 +116,29 @@ export async function cancelScheduledHabitReminders() {
     scheduled.map((item) => Notifications.cancelScheduledNotificationAsync(item.notificationId).catch(console.error)),
   );
   await savePreference(reminderPreferenceKey, "[]");
+  notificationDebug("cancel:complete", { cancelledCount: scheduled.length });
+}
+
+export async function getNotificationDebugSnapshot() {
+  const preferences = await loadPreferences();
+  const scheduledByPreference = parseScheduledReminders(preferences.scheduledHabitNotificationIds);
+  const scheduledNative = await Notifications.getAllScheduledNotificationsAsync().catch((error) => {
+    notificationDebug("debug:native-scheduled-failed", { error: error instanceof Error ? error.message : String(error) });
+    return [];
+  });
+  const permissions = await Notifications.getPermissionsAsync().catch((error) => {
+    notificationDebug("debug:permissions-failed", { error: error instanceof Error ? error.message : String(error) });
+    return undefined;
+  });
+
+  return {
+    events: [...debugEvents],
+    permissions,
+    remindersEnabled: preferences.remindersEnabled,
+    scheduledByPreference,
+    scheduledNativeCount: scheduledNative.length,
+    scheduledNative,
+  };
 }
 
 function parseScheduledReminders(value?: string): ScheduledReminder[] {
@@ -116,35 +161,14 @@ function parseScheduledReminders(value?: string): ScheduledReminder[] {
   }
 }
 
-function parseReminderTime(value?: string) {
-  if (!value) {
-    return undefined;
+function notificationDebug(message: string, details?: Record<string, unknown>) {
+  const event = { details, message, timestamp: new Date().toISOString() };
+  debugEvents.push(event);
+  if (debugEvents.length > 50) {
+    debugEvents.shift();
   }
 
-  const match = value.trim().match(/^(\d{1,2}):(\d{2})(?:\s*([AP]M))?$/i);
-  if (!match) {
-    return undefined;
+  if (__DEV__) {
+    console.debug("[notifications]", message, details ?? {});
   }
-
-  let hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const meridiem = match[3]?.toUpperCase();
-
-  if (Number.isNaN(hour) || Number.isNaN(minute) || minute < 0 || minute > 59) {
-    return undefined;
-  }
-
-  if (meridiem === "PM" && hour < 12) {
-    hour += 12;
-  }
-
-  if (meridiem === "AM" && hour === 12) {
-    hour = 0;
-  }
-
-  if (hour < 0 || hour > 23) {
-    return undefined;
-  }
-
-  return { hour, minute };
 }
